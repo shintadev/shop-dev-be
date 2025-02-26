@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: shop-dev-be
+    
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
