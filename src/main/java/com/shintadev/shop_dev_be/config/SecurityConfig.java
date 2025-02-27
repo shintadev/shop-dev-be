@@ -34,18 +34,18 @@ public class SecurityConfig {
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(auth -> auth
             // Public endpoints
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/api/products/**").permitAll()
+            .requestMatchers("/auth/**").permitAll()
+            .requestMatchers("/products/**").permitAll()
             // Secured endpoints
-            .requestMatchers("/api/users/**").authenticated()
-            .requestMatchers("/api/orders/**").authenticated()
-            .requestMatchers("/api/payments/**").authenticated()
-            .requestMatchers("/api/reviews/**").authenticated()
-            .requestMatchers("/api/carts/**").authenticated()
-            .requestMatchers("/api/addresses/**").authenticated()
-            .requestMatchers("/api/wishlists/**").authenticated()
+            .requestMatchers("/users/**").authenticated()
+            .requestMatchers("/orders/**").authenticated()
+            .requestMatchers("/payments/**").authenticated()
+            .requestMatchers("/reviews/**").authenticated()
+            .requestMatchers("/carts/**").authenticated()
+            .requestMatchers("/addresses/**").authenticated()
+            .requestMatchers("/wishlists/**").authenticated()
             // Admin-only endpoints
-            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/admin/**").hasRole("ADMIN")
             // All other endpoints must be authenticated
             .anyRequest().authenticated());
     return http.build();

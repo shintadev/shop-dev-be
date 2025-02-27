@@ -1,6 +1,7 @@
 package com.shintadev.shop_dev_be.domain.dto.request.auth;
 
 import com.shintadev.shop_dev_be.domain.dto.request.user.UserRequest;
+import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -18,9 +19,12 @@ public class RegisterRequest extends UserRequest {
   // @Size(max = 128, message = "Email must be less than 128 characters")
   // private String email;
 
-  @NotBlank
+  @NotBlank(message = "Password is required")
   @Size(min = 8, max = 64, message = "Password must be between 8 and 64 characters")
-  @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+  // @Pattern(regexp =
+  // "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+  // message = "Password must contain at least one uppercase letter, one lowercase
+  // letter, one number, and one special character")
   private String password;
 
   // @NotBlank
@@ -41,4 +45,6 @@ public class RegisterRequest extends UserRequest {
   // @Pattern(regexp = "^\\d{10,15}$", message = "Phone must contain only
   // numbers")
   // private String phone;
+
+  final private UserStatus status = UserStatus.INACTIVE;
 }

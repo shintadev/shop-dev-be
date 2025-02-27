@@ -20,19 +20,19 @@ public class AppConfig {
 
   @Bean
   public BCryptPasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder(
+    return new BCryptPasswordEncoder() {
 
     // Uncomment this block to use plain text password
-    // @Override
-    // public String encode(CharSequence rawPassword) {
-    // return rawPassword.toString();
-    // }
+      @Override
+      public String encode(CharSequence rawPassword) {
+        return rawPassword.toString();
+      }
 
-    // @Override
-    // public boolean matches(CharSequence rawPassword, String encodedPassword) {
-    // return rawPassword.toString().equals(encodedPassword);
-    // }
-    );
+      @Override
+      public boolean matches(CharSequence rawPassword, String encodedPassword) {
+        return rawPassword.toString().equals(encodedPassword);
+      }
+    };
   }
 
   @Bean

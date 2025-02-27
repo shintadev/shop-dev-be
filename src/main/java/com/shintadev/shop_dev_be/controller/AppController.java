@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
-import com.shintadev.shop_dev_be.repository.UserRepo;
+import com.shintadev.shop_dev_be.repository.user.UserRepo;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

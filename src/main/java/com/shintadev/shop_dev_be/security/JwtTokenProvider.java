@@ -10,9 +10,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -62,9 +65,20 @@ public class JwtTokenProvider {
     return null;
   }
 
-  public boolean validateToken(String token, UserDetails userDetails) {
-    final String username = getUsernameFromToken(token);
-    return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+  public boolean validateToken(String token) {
+    try {
+      getClaimsFromToken(token);
+      return true;
+    } catch (MalformedJwtException ex) {
+      log.error("Invalid JWT token");
+    } catch (ExpiredJwtException ex) {
+      log.error("Expired JWT token");
+    } catch (UnsupportedJwtException ex) {
+      log.error("Unsupported JWT token");
+    } catch (IllegalArgumentException ex) {
+      log.error("JWT claims string is empty");
+    }
+    return false;
   }
 
   public boolean isTokenExpired(String token) {

@@ -1,67 +1,142 @@
 package com.shintadev.shop_dev_be.service.common.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.shintadev.shop_dev_be.domain.dto.request.auth.EmailVerifyRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.LoginRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.RegisterRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.user.UserResponse;
+import com.shintadev.shop_dev_be.domain.model.entity.user.EmailVerificationToken;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
+import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
+import com.shintadev.shop_dev_be.repository.user.EmailVerificationTokenRepo;
+import com.shintadev.shop_dev_be.security.JwtTokenProvider;
 import com.shintadev.shop_dev_be.service.common.AuthService;
 import com.shintadev.shop_dev_be.service.user.UserService;
 
 import lombok.RequiredArgsConstructor;
-
+import lombok.var;
+import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
   private final UserService userService;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final PasswordEncoder passwordEncoder;
+  private final AuthenticationManager authenticationManager;
+  private final EmailVerificationTokenRepo emailVerificationTokenRepo;
 
   @Override
   public void register(RegisterRequest request) {
+    // 1. Create user
     UserResponse user = userService.createUser(request);
 
+    // 2. Create email verification token
+    EmailVerificationToken emailVerificationToken = EmailVerificationToken.builder()
+        .userId(user.getId())
+        .expiryDate(LocalDateTime.now().plusDays(1))
+        .build();
+    log.info("Email verification token: {}", emailVerificationToken);
+    emailVerificationTokenRepo.save(emailVerificationToken);
+
+    // 3. Send verification email
     // TODO: Send verification email
+    log.info("Verification email sent to {}", user.getEmail());
   }
 
   @Override
-  public void verify(EmailVerifyRequest request) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'verify'");
+  public void verify(String token) {
+    // 1. Check if token is exists
+    EmailVerificationToken emailVerificationToken = emailVerificationTokenRepo.findById(UUID.fromString(token))
+        .orElseThrow(() -> new RuntimeException("Invalid verification token"));
+
+    // 2. Check if token is expired
+    if (emailVerificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+      throw new RuntimeException("Verification token expired");
+    }
+
+    // 3. Update user status
+    UserResponse user = userService.updateUserStatus(emailVerificationToken.getUserId(), UserStatus.ACTIVE);
+
+    // 4. Delete token
+    emailVerificationTokenRepo.delete(emailVerificationToken);
+
+    // 5. Send welcome email
+    // TODO: Send welcome email
+    log.info("Welcome email sent to {}", user.getEmail());
+    log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
   }
 
   @Override
   public void resendVerification(String email) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'resendVerification'");
+    // 1. Check if user exists
+    UserResponse user = userService.getUserByEmail(email);
+
+    // 2. Check if user is active
+    if (user.getStatus() == UserStatus.ACTIVE) {
+      throw new RuntimeException("User already verified");
+    }
+
+    // 3. Check if any token exists
+    List<EmailVerificationToken> emailVerificationTokens = emailVerificationTokenRepo.findByUserId(user.getId())
+        .orElse(null);
+    if (emailVerificationTokens != null) {
+      var validToken = emailVerificationTokens.stream()
+          .filter(token -> token.getExpiryDate().isAfter(LocalDateTime.now().plusHours(1)))
+          .findFirst()
+          .orElse(null);
+      emailVerificationTokenRepo.deleteAll(
+          emailVerificationTokens.stream()
+              .filter(token -> !token.equals(validToken))
+              .toList());
+      if (validToken != null) {
+        // TODO: Send verification email
+        log.info("Verification email sent to {}", user.getEmail());
+        log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + validToken.getId().toString());
+        return;
+      }
+    }
+
+    // 4. Create new token
+    EmailVerificationToken emailVerificationToken = EmailVerificationToken.builder()
+        .userId(user.getId())
+        .expiryDate(LocalDateTime.now().plusHours(1))
+        .build();
+    emailVerificationTokenRepo.save(emailVerificationToken);
+
+    // 5. Send verification email
+    // TODO: Send verification email
+    log.info("Verification email sent to {}", user.getEmail());
+    log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
   }
 
-  @Override
   public String login(LoginRequest request) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'login'");
   }
 
-  @Override
   public void forgotPassword(String email) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'forgotPassword'");
   }
 
-  @Override
   public void resetPassword(String token, String email) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'resetPassword'");
   }
 
-  @Override
   public void changePassword(String token, String newPassword) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'changePassword'");
   }
 
-  @Override
   public void logout(String token) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'logout'");
