@@ -1,5 +1,9 @@
 package com.shintadev.shop_dev_be.domain.dto.request.user;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.shintadev.shop_dev_be.domain.model.entity.user.Role;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 
 import jakarta.persistence.EnumType;
@@ -38,4 +42,6 @@ public class UserRequest {
 
   @Enumerated(EnumType.STRING)
   private UserStatus status = UserStatus.INACTIVE;
+
+  private Set<String> roles = new HashSet<>(Set.of("USER"));
 }

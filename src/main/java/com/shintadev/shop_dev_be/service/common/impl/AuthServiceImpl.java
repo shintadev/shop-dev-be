@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +22,14 @@ import com.shintadev.shop_dev_be.security.JwtTokenProvider;
 import com.shintadev.shop_dev_be.service.common.AuthService;
 import com.shintadev.shop_dev_be.service.user.UserService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.var;
 import lombok.extern.slf4j.Slf4j;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class AuthServiceImpl implements AuthService {
 
   private final UserService userService;
@@ -49,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
     // 3. Send verification email
     // TODO: Send verification email
     log.info("Verification email sent to {}", user.getEmail());
+    log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
   }
 
   @Override
@@ -71,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
     // 5. Send welcome email
     // TODO: Send welcome email
     log.info("Welcome email sent to {}", user.getEmail());
-    log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
+    log.info("Welcome to our shop!");
   }
 
   @Override
@@ -117,9 +123,22 @@ public class AuthServiceImpl implements AuthService {
     log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
   }
 
+  @Override
   public String login(LoginRequest request) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'login'");
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    User user = (User) authentication.getPrincipal();
+    log.info("User: {}", user);
+    if (user.getStatus() != UserStatus.ACTIVE) {
+      if (user.getStatus() == UserStatus.INACTIVE) {
+        throw new RuntimeException("Please verify your email to login");
+      } else {
+        throw new RuntimeException("User is not active");
+      }
+    }
+    return jwtTokenProvider.generateToken(user);
   }
 
   public void forgotPassword(String email) {
@@ -127,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
     throw new UnsupportedOperationException("Unimplemented method 'forgotPassword'");
   }
 
-  public void resetPassword(String token, String email) {
+  public void resetPassword(String token) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'resetPassword'");
   }
@@ -135,11 +154,6 @@ public class AuthServiceImpl implements AuthService {
   public void changePassword(String token, String newPassword) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'changePassword'");
-  }
-
-  public void logout(String token) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'logout'");
   }
 
 }

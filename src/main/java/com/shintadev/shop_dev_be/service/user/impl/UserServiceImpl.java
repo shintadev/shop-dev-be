@@ -1,6 +1,8 @@
 package com.shintadev.shop_dev_be.service.user.impl;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import com.shintadev.shop_dev_be.domain.model.entity.user.EmailVerificationToken
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 import com.shintadev.shop_dev_be.repository.user.EmailVerificationTokenRepo;
+import com.shintadev.shop_dev_be.repository.user.RoleRepo;
 import com.shintadev.shop_dev_be.repository.user.UserRepo;
 import com.shintadev.shop_dev_be.service.user.UserService;
 
@@ -30,6 +33,8 @@ public class UserServiceImpl implements UserService {
   private final UserMapper userMapper;
 
   private final PasswordEncoder passwordEncoder;
+
+  private final RoleRepo roleRepo;
 
   @Transactional(readOnly = true)
   @Override
@@ -60,10 +65,17 @@ public class UserServiceImpl implements UserService {
     log.info("User: {}", user);
     // 3. Encode password
     user.setPassword(passwordEncoder.encode(request.getPassword()));
-    // 4. Save user
+    // 4. Set roles
+    var roles = request.getRoles()
+        .stream()
+        .map(roleRepo::findByName)
+        .map(Optional::get)
+        .collect(Collectors.toSet());
+    user.setRoles(roles);
+    // 5. Save user
     User savedUser = userRepo.save(user);
     log.info("Saved user: {}", savedUser);
-    // 5. Map user to response
+    // 6. Map user to response
     return userMapper.toUserResponse(savedUser);
   }
 
@@ -77,6 +89,9 @@ public class UserServiceImpl implements UserService {
   public UserResponse updateUserStatus(Long id, UserStatus status) {
     User user = userRepo.findByIdForUpdate(id)
         .orElseThrow(() -> new RuntimeException("User not found"));
+    if (user.getStatus() == status) {
+      return userMapper.toUserResponse(user);
+    }
     user.setStatus(status);
     return userMapper.toUserResponse(userRepo.save(user));
   }

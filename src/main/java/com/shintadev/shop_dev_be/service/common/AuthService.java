@@ -11,13 +11,12 @@ public interface AuthService {
 
   void resendVerification(String email);
 
-  // String login(LoginRequest request);
+  String login(LoginRequest request);
 
   // void forgotPassword(String email);
 
-  // void resetPassword(String token, String email);
+  // void resetPassword(String token);
 
   // void changePassword(String token, String newPassword);
 
-  // void logout(String token);
 }

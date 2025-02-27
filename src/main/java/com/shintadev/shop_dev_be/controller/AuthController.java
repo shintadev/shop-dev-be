@@ -33,29 +33,28 @@ public class AuthController {
   @PostMapping("/register")
   public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
     authService.register(request);
-    return new ResponseEntity<>("Register successfully", HttpStatus.CREATED);
+    return new ResponseEntity<>("Register successfully!", HttpStatus.CREATED);
   }
 
   @PostMapping("/verify")
   public ResponseEntity<?> verify(@RequestParam String token) {
     authService.verify(token);
-    return new ResponseEntity<>("Verify successfully", HttpStatus.OK);
+    return new ResponseEntity<>("Verify successfully!", HttpStatus.OK);
   }
 
   @PostMapping("/resend-verification")
   public ResponseEntity<?> resendVerification(@RequestParam String email) {
     authService.resendVerification(email);
-    return new ResponseEntity<>("Resend verification successfully", HttpStatus.OK);
+    return new ResponseEntity<>("Resend verification successfully!", HttpStatus.OK);
   }
 
-  // @PostMapping("/login")
-  // public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-  // var token = authService.login(request);
-  // var headers = new HttpHeaders();
-  // headers.set("Authorization", "Bearer " + token);
-  // return new ResponseEntity<>(authService.login(request), headers,
-  // HttpStatus.OK);
-  // }
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    var token = authService.login(request);
+    var headers = new HttpHeaders();
+    headers.set("Authorization", "Bearer " + token);
+    return new ResponseEntity<>("Login successfully!", headers, HttpStatus.OK);
+  }
 
   // @PostMapping("/forgot-password")
   // public ResponseEntity<?> forgotPassword(@RequestParam String email) {
