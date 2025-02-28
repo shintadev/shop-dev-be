@@ -41,6 +41,17 @@ spring:
             - email
             - profile
             - openid
+          
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+      cache-null-values: false
 
 server:
   port: ${SERVER_PORT:8080}
