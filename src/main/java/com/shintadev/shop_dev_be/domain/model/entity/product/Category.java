@@ -45,7 +45,8 @@ public class Category {
   private String imageUrl;
 
   @Column(name = "is_active", nullable = false)
-  private boolean active;
+  @Builder.Default
+  private boolean active = true;
 
   @ManyToOne
   @JoinColumn(name = "parent_id")
