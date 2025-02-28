@@ -8,8 +8,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.shintadev.shop_dev_be.domain.dto.request.auth.ChangePasswordRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.LoginRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.RegisterRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.user.UserResponse;
@@ -38,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
   private final AuthenticationManager authenticationManager;
   private final EmailVerificationTokenRepo emailVerificationTokenRepo;
   private final ResetPasswordTokenRepo resetPasswordTokenRepo;
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   public void register(RegisterRequest request) {
@@ -197,15 +200,18 @@ public class AuthServiceImpl implements AuthService {
 
     // 4. Delete token
     resetPasswordTokenRepo.delete(resetPasswordToken);
-
-    // 5. Send reset password success email
-    // TODO: Send reset password success email
-    log.info("Password reset successfully");
   }
 
-  public void changePassword(String token, String newPassword) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'changePassword'");
+  @Override
+  public void changePassword(ChangePasswordRequest request) {
+    // 1. Check if password is correct
+    User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+      throw new RuntimeException("Invalid password");
+    }
+
+    // 2. Update user password
+    userService.updateUserPassword(user.getId(), request.getNewPassword());
   }
 
 }

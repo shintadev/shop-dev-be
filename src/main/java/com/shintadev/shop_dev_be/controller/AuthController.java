@@ -4,7 +4,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,12 +11,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shintadev.shop_dev_be.domain.dto.request.auth.ChangePasswordRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.LoginRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.RegisterRequest;
-import com.shintadev.shop_dev_be.security.jwt.JwtTokenProvider;
 import com.shintadev.shop_dev_be.service.common.AuthService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -26,8 +28,6 @@ import lombok.RequiredArgsConstructor;
 @Validated
 public class AuthController {
 
-  private final AuthenticationManager authenticationManager;
-  private final JwtTokenProvider jwtTokenProvider;
   private final AuthService authService;
 
   @PostMapping("/register")
@@ -56,32 +56,25 @@ public class AuthController {
     return new ResponseEntity<>("Login successfully!", headers, HttpStatus.OK);
   }
 
-  // @PostMapping("/forgot-password")
-  // public ResponseEntity<?> forgotPassword(@RequestParam String email) {
-  // authService.forgotPassword(email);
-  // return new ResponseEntity<>("Send reset password email successfully",
-  // HttpStatus.OK);
-  // }
+  @PostMapping("/forgot-password")
+  public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+    authService.forgotPassword(email);
+    return new ResponseEntity<>("Send reset password email successfully", HttpStatus.OK);
+  }
 
-  // @PostMapping("/reset-password")
-  // public ResponseEntity<?> resetPassword(@RequestParam String token,
-  // @RequestParam String email) {
-  // authService.resetPassword(token, email);
-  // return new ResponseEntity<>("Reset password successfully", HttpStatus.OK);
-  // }
+  @PostMapping("/reset-password")
+  public ResponseEntity<?> resetPassword(
+      @NotBlank(message = "Token is required") @RequestParam String token,
+      @NotBlank(message = "New password is required") @Size(min = 8, max = 64, message = "New password must be between 8 and 64 characters") @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character") @RequestParam String newPassword) {
+    authService.resetPassword(token, newPassword);
+    return new ResponseEntity<>("Reset password successfully", HttpStatus.OK);
+  }
 
-  // @PreAuthorize("isAuthenticated()")
-  // @PostMapping("/change-password")
-  // public ResponseEntity<?> changePassword(@RequestParam String token,
-  // @RequestParam String newPassword) {
-  // authService.changePassword(token, newPassword);
-  // return new ResponseEntity<>("Change password successfully", HttpStatus.OK);
-  // }
+  @PreAuthorize("isAuthenticated()")
+  @PostMapping("/change-password")
+  public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    authService.changePassword(request);
+    return new ResponseEntity<>("Change password successfully", HttpStatus.OK);
+  }
 
-  // @PreAuthorize("isAuthenticated()")
-  // @PostMapping("/logout")
-  // public ResponseEntity<?> logout(@RequestParam String token) {
-  // authService.logout(token);
-  // return new ResponseEntity<>("Logout successfully", HttpStatus.OK);
-  // }
 }
