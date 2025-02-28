@@ -2,22 +2,23 @@ package com.shintadev.shop_dev_be.service.common.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.shintadev.shop_dev_be.domain.dto.request.auth.LoginRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.RegisterRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.user.UserResponse;
 import com.shintadev.shop_dev_be.domain.model.entity.user.EmailVerificationToken;
+import com.shintadev.shop_dev_be.domain.model.entity.user.ResetPasswordToken;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 import com.shintadev.shop_dev_be.repository.user.EmailVerificationTokenRepo;
+import com.shintadev.shop_dev_be.repository.user.ResetPasswordTokenRepo;
 import com.shintadev.shop_dev_be.security.jwt.JwtTokenProvider;
 import com.shintadev.shop_dev_be.service.common.AuthService;
 import com.shintadev.shop_dev_be.service.user.UserService;
@@ -34,9 +35,9 @@ public class AuthServiceImpl implements AuthService {
 
   private final UserService userService;
   private final JwtTokenProvider jwtTokenProvider;
-  private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final EmailVerificationTokenRepo emailVerificationTokenRepo;
+  private final ResetPasswordTokenRepo resetPasswordTokenRepo;
 
   @Override
   public void register(RegisterRequest request) {
@@ -141,14 +142,65 @@ public class AuthServiceImpl implements AuthService {
     return jwtTokenProvider.generateToken(user);
   }
 
+  @Override
   public void forgotPassword(String email) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'forgotPassword'");
+    // 1. Check if user exists
+    UserResponse user = userService.getUserByEmail(email);
+
+    // 2. Check if any token exists
+    List<ResetPasswordToken> resetPasswordTokens = resetPasswordTokenRepo.findByUserId(user.getId())
+        .orElse(null);
+    if (resetPasswordTokens != null) {
+      var validToken = resetPasswordTokens.stream()
+          .filter(token -> token.getExpiryDate().isAfter(LocalDateTime.now().plusHours(1)))
+          .findFirst()
+          .orElse(null);
+      resetPasswordTokenRepo.deleteAll(
+          resetPasswordTokens.stream()
+              .filter(token -> !token.equals(validToken))
+              .toList());
+      if (validToken != null) {
+        // TODO: Send reset password email
+        log.info("Reset password email sent to {}", user.getEmail());
+        log.info("Link: {}", "http://localhost:8080/api/auth/reset-password?token=" + validToken.getId().toString());
+        return;
+      }
+    }
+
+    // 3. Create new token
+    ResetPasswordToken resetPasswordToken = ResetPasswordToken.builder()
+        .userId(user.getId())
+        .expiryDate(LocalDateTime.now().plusHours(1))
+        .build();
+    resetPasswordTokenRepo.save(resetPasswordToken);
+
+    // 4. Send reset password email
+    // TODO: Send reset password email
+    log.info("Reset password email sent to {}", user.getEmail());
+    log.info("Link: {}",
+        "http://localhost:8080/api/auth/reset-password?token=" + resetPasswordToken.getId().toString());
   }
 
-  public void resetPassword(String token) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'resetPassword'");
+  @Override
+  public void resetPassword(String token, String newPassword) {
+    // 1. Check if token exists
+    ResetPasswordToken resetPasswordToken = resetPasswordTokenRepo.findById(UUID.fromString(token))
+        .orElseThrow(() -> new RuntimeException("Invalid reset password token"));
+
+    // 2. Check if token is expired
+    if (resetPasswordToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+      throw new RuntimeException("Reset password token expired");
+    }
+
+    // 3. Update user password
+    userService.updateUserPassword(resetPasswordToken.getUserId(), newPassword);
+
+    // 4. Delete token
+    resetPasswordTokenRepo.delete(resetPasswordToken);
+
+    // 5. Send reset password success email
+    // TODO: Send reset password success email
+    log.info("Password reset successfully");
   }
 
   public void changePassword(String token, String newPassword) {

@@ -16,6 +16,8 @@ public interface UserService {
 
   UserResponse updateUserStatus(Long id, UserStatus status);
 
+  void updateUserPassword(Long id, String newPassword);
+
   void deleteUser(Long id);
 
   boolean isEmailExists(String email);

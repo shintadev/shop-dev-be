@@ -1,6 +1,5 @@
 package com.shintadev.shop_dev_be.service.user.impl;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -11,10 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.shintadev.shop_dev_be.domain.dto.mapper.UserMapper;
 import com.shintadev.shop_dev_be.domain.dto.request.user.UserRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.user.UserResponse;
-import com.shintadev.shop_dev_be.domain.model.entity.user.EmailVerificationToken;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
-import com.shintadev.shop_dev_be.repository.user.EmailVerificationTokenRepo;
 import com.shintadev.shop_dev_be.repository.user.RoleRepo;
 import com.shintadev.shop_dev_be.repository.user.UserRepo;
 import com.shintadev.shop_dev_be.service.user.UserService;
@@ -94,6 +91,14 @@ public class UserServiceImpl implements UserService {
     }
     user.setStatus(status);
     return userMapper.toUserResponse(userRepo.save(user));
+  }
+
+  @Override
+  public void updateUserPassword(Long id, String newPassword) {
+    User user = userRepo.findByIdForUpdate(id)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+    user.setPassword(passwordEncoder.encode(newPassword));
+    userRepo.save(user);
   }
 
   @Override
