@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -27,6 +26,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,8 +35,10 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Entity
-@Table(name = "users", indexes = {
-    @Index(name = "idx_user_email", columnList = "email", unique = true)
+@Table(name = "users", uniqueConstraints = {
+    @UniqueConstraint(columnNames = "email")
+}, indexes = {
+    @Index(name = "idx_user_email", columnList = "email")
 })
 @NoArgsConstructor
 @AllArgsConstructor
@@ -52,7 +54,7 @@ public class User implements UserDetails {
   @Column(name = "last_name", length = 64, nullable = false)
   private String lastName;
 
-  @Column(name = "display_name", length = 128)
+  @Column(name = "display_name", length = 128, nullable = false)
   private String displayName;
 
   @Column(name = "email", length = 128, nullable = false, unique = true)
@@ -118,7 +120,7 @@ public class User implements UserDetails {
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return roles.stream()
-        .map(role -> new SimpleGrantedAuthority(role.getName()))
+        .map(role -> new SimpleGrantedAuthority(role.getName().name()))
         .toList();
   }
 

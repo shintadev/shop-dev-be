@@ -13,7 +13,7 @@
 
 	<groupId>com.shintadev</groupId>
 	<artifactId>shop-dev-be</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.6-SNAPSHOT</version>
 	<name>shop-dev-be</name>
 	<description>Sample shop web RESTful API using Spring Boot</description>
 	<url>https://github.com/shintadev/shop-dev-be</url>
@@ -76,6 +76,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 
 		<!-- Database -->

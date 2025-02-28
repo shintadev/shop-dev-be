@@ -10,7 +10,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.shintadev.shop_dev_be.security.JwtAuthFilter;
+import com.shintadev.shop_dev_be.security.jwt.AuthEntryPointJwt;
+import com.shintadev.shop_dev_be.security.jwt.JwtAuthFilter;
+import com.shintadev.shop_dev_be.security.oauth2.OAuth2AuthFailureHandler;
+import com.shintadev.shop_dev_be.security.oauth2.OAuth2AuthSuccessHandler;
+import com.shintadev.shop_dev_be.security.oauth2.OAuth2UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,12 +26,17 @@ public class SecurityConfig {
 
   private final JwtAuthFilter jwtAuthFilter;
   private final AuthenticationProvider authenticationProvider;
+  private final AuthEntryPointJwt unauthorizedHandler;
+  private final OAuth2UserService oAuth2UserService;
+  private final OAuth2AuthSuccessHandler oAuth2AuthSuccessHandler;
+  private final OAuth2AuthFailureHandler oAuth2AuthFailureHandler;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .cors(cors -> cors.disable())
         .csrf(csrf -> csrf.disable())
+        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(authenticationProvider)
@@ -37,17 +46,22 @@ public class SecurityConfig {
             .requestMatchers("/auth/**").permitAll()
             .requestMatchers("/products/**").permitAll()
             // Secured endpoints
-            .requestMatchers("/users/**").authenticated()
-            .requestMatchers("/orders/**").authenticated()
-            .requestMatchers("/payments/**").authenticated()
-            .requestMatchers("/reviews/**").authenticated()
-            .requestMatchers("/carts/**").authenticated()
-            .requestMatchers("/addresses/**").authenticated()
-            .requestMatchers("/wishlists/**").authenticated()
+            .requestMatchers("/users/**").hasRole("USER")
+            .requestMatchers("/orders/**").hasRole("USER")
+            .requestMatchers("/payments/**").hasRole("USER")
+            .requestMatchers("/reviews/**").hasRole("USER")
+            .requestMatchers("/carts/**").hasRole("USER")
+            .requestMatchers("/addresses/**").hasRole("USER")
+            .requestMatchers("/wishlists/**").hasRole("USER")
             // Admin-only endpoints
             .requestMatchers("/admin/**").hasRole("ADMIN")
             // All other endpoints must be authenticated
-            .anyRequest().authenticated());
+            .anyRequest().authenticated())
+        .oauth2Login(oauth2 -> oauth2
+            .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))
+            .successHandler(oAuth2AuthSuccessHandler)
+            .failureHandler(oAuth2AuthFailureHandler));
+
     return http.build();
   }
 

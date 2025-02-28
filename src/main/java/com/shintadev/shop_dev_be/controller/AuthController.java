@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shintadev.shop_dev_be.domain.dto.request.auth.LoginRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.RegisterRequest;
-import com.shintadev.shop_dev_be.security.JwtTokenProvider;
+import com.shintadev.shop_dev_be.security.jwt.JwtTokenProvider;
 import com.shintadev.shop_dev_be.service.common.AuthService;
 
 import jakarta.validation.Valid;

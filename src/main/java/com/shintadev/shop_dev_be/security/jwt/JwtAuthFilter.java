@@ -1,4 +1,4 @@
-package com.shintadev.shop_dev_be.security;
+package com.shintadev.shop_dev_be.security.jwt;
 
 import java.io.IOException;
 
@@ -6,6 +6,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -25,7 +26,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
   private final JwtTokenProvider jwtTokenProvider;
 
-  private final CustomUserDetailsService userDetailsService;
+  private final UserDetailsService userDetailsService;
 
   @Override
   protected void doFilterInternal(
@@ -53,7 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
       }
     } catch (Exception e) {
-      log.error("Error while processing authentication filter", e);
+      log.error("Error while processing authentication filter: {}", e.getMessage());
     }
     filterChain.doFilter(request, response);
   }

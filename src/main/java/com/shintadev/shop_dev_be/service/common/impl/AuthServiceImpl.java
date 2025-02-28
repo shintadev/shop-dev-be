@@ -18,7 +18,7 @@ import com.shintadev.shop_dev_be.domain.model.entity.user.EmailVerificationToken
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 import com.shintadev.shop_dev_be.repository.user.EmailVerificationTokenRepo;
-import com.shintadev.shop_dev_be.security.JwtTokenProvider;
+import com.shintadev.shop_dev_be.security.jwt.JwtTokenProvider;
 import com.shintadev.shop_dev_be.service.common.AuthService;
 import com.shintadev.shop_dev_be.service.user.UserService;
 
