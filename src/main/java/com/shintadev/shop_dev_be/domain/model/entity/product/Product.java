@@ -14,6 +14,8 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -66,11 +68,14 @@ public class Product {
   @Builder.Default
   private List<String> images = new ArrayList<>();
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private ProductStatus status;
+  @Builder.Default
+  private ProductStatus status = ProductStatus.ACTIVE;
 
   @Column(name = "is_featured", nullable = false)
-  private Boolean featured;
+  @Builder.Default
+  private Boolean featured = false;
 
   @ManyToOne
   @JoinColumn(name = "category_id")

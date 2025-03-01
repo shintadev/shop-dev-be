@@ -13,7 +13,7 @@
 
 	<groupId>com.shintadev</groupId>
 	<artifactId>shop-dev-be</artifactId>
-	<version>0.0.9-SNAPSHOT</version>
+	<version>0.0.10-SNAPSHOT</version>
 	<name>shop-dev-be</name>
 	<description>Sample shop web RESTful API using Spring Boot</description>
 	<url>https://github.com/shintadev/shop-dev-be</url>
@@ -142,6 +142,13 @@
 			<artifactId>mapstruct-processor</artifactId>
 			<version>${mapstruct.version}</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<!-- Utils -->
+		<dependency>
+			<groupId>com.github.slugify</groupId>
+			<artifactId>slugify</artifactId>
+			<version>3.0.7</version>
 		</dependency>
 
 		<!-- Testing -->
