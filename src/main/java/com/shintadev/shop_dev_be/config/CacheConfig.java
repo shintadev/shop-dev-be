@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CacheConfig {
 
-  @Value("${spring.cache.redis.time-to-live}")
+  @Value("${app.cache.product.ttl}")
   private long timeToLive;
 
   @Bean

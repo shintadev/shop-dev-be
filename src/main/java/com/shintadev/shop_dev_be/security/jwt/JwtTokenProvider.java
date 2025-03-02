@@ -28,10 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class JwtTokenProvider {
 
-  @Value("${security.jwt.secret}")
+  @Value("${app.jwt.secret}")
   private String secret;
 
-  @Value("${security.jwt.expiration-in-ms}")
+  @Value("${app.jwt.expiration-in-ms}")
   private Long expiration;
 
   private SecretKey secretKey;

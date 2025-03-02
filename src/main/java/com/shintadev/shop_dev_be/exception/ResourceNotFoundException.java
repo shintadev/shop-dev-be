@@ -29,7 +29,7 @@ public class ResourceNotFoundException extends RuntimeException {
   }
 
   /**
-   * Create a new ResourceNotFoundException for a resource with an ID
+   * Create a new ResourceNotFoundException for a resource with a field value
    *
    * @param resourceName the name of the resource
    * @param fieldName    the name of the field

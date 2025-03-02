@@ -1,0 +1,60 @@
+spring:
+  config:
+    import:
+      - optional:file:.env.dev[.properties]
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID}
+
+server:
+  port: ${SERVER_PORT}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-in-ms: ${JWT_EXPIRATION_IN_MS}
+  email:
+    verification-link: ${APP_URL}/verify?token=
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  cache:
+    product:
+      ttl: ${CACHE_PRODUCT_TTL}
+
+logging:
+  level:
+    com:
+      shintadev: DEBUG
+    org:
+      springframework:
+        web: INFO
+        security: INFO
+        data:
+          redis: DEBUG
+        kafka: DEBUG
+        
+        
