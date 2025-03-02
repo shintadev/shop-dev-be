@@ -11,8 +11,7 @@ public class KafkaConstants {
    */
   public static final String VERIFICATION_EMAILS_TOPIC = "verification-emails";
   public static final String PASSWORD_RESET_EMAILS_TOPIC = "password-reset-emails";
-  public static final String ORDER_CONFIRMATION_EMAILS_TOPIC = "order-confirmation-emails";
-
+  public static final String WELCOME_EMAILS_TOPIC = "welcome-emails";
   /*
    * Email Groups
    */
@@ -26,7 +25,4 @@ public class KafkaConstants {
   public static final String SUBJECT_KEY = "subject";
   public static final String VERIFICATION_LINK_KEY = "verificationLink";
   public static final String RESET_LINK_KEY = "resetLink";
-  public static final String ORDER_ID_KEY = "orderId";
-  public static final String ORDER_DATE_KEY = "orderDate";
-  public static final String TOTAL_AMOUNT_KEY = "totalAmount";
 }

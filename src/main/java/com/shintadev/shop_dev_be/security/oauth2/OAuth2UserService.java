@@ -1,5 +1,6 @@
 package com.shintadev.shop_dev_be.security.oauth2;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -15,15 +16,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.shintadev.shop_dev_be.constant.KafkaConstants;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.RoleName;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
+import com.shintadev.shop_dev_be.exception.ResourceNotFoundException;
+import com.shintadev.shop_dev_be.kafka.EmailProducer;
 import com.shintadev.shop_dev_be.repository.user.UserRepo;
 import com.shintadev.shop_dev_be.repository.user.RoleRepo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service implementation for OAuth2 user authentication
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,7 +39,15 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
   private final UserRepo userRepo;
   private final RoleRepo roleRepo;
+  private final EmailProducer emailProducer;
 
+  /**
+   * Load user details from OAuth2 provider
+   * 
+   * @param userRequest the OAuth2 user request
+   * @return the OAuth2 user
+   * @throws OAuth2AuthenticationException if the user is not found
+   */
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
     OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -47,12 +62,19 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
   }
 
+  /**
+   * Process the OAuth2 user
+   * 
+   * @param userRequest the OAuth2 user request
+   * @param oAuth2User  the OAuth2 user
+   * @return the OAuth2 user
+   */
   private OAuth2User processOAuth2User(OAuth2UserRequest userRequest, OAuth2User oAuth2User) {
     Map<String, Object> attributes = oAuth2User.getAttributes();
     log.info("Attributes: {}", attributes);
 
     if (!attributes.containsKey("email") || !StringUtils.hasText((String) attributes.get("email"))) {
-      throw new RuntimeException("Email not found from OAuth2 provider");
+      throw new ResourceNotFoundException("Email not found from OAuth2 provider");
     }
 
     String email = (String) attributes.get("email");
@@ -66,7 +88,11 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
       user = userOpt.get();
     } else {
       user = registerOAuth2User(attributes);
-      // TODO: Send welcome email to user
+      Map<String, Object> emailData = new HashMap<>();
+      emailData.put(KafkaConstants.RECIPIENT_EMAIL_KEY, user.getEmail());
+      emailData.put(KafkaConstants.RECIPIENT_NAME_KEY, user.getDisplayName());
+      emailData.put(KafkaConstants.SUBJECT_KEY, "Welcome to Shop Dev");
+      emailProducer.sendWelcomeEmail(emailData);
     }
 
     return new DefaultOAuth2User(
@@ -75,6 +101,12 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         "email");
   }
 
+  /**
+   * Register the OAuth2 user
+   * 
+   * @param attributes the OAuth2 user attributes from the provider
+   * @return the registered user
+   */
   private User registerOAuth2User(Map<String, Object> attributes) {
     User user = User.builder()
         .email((String) attributes.get("email"))
@@ -85,7 +117,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         .status(UserStatus.ACTIVE)
         .roles(
             Set.of(roleRepo.findByName(RoleName.USER)
-                .orElseThrow(() -> new RuntimeException("Role not found"))))
+                .orElseThrow(() -> ResourceNotFoundException.create("Role", "name", RoleName.USER))))
         .build();
 
     log.info("Registered user: {}", user);

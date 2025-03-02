@@ -17,12 +17,24 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Handles successful OAuth2 authentication
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
   private final JwtTokenProvider jwtTokenProvider;
 
+  /**
+   * Handles successful OAuth2 authentication
+   * 
+   * @param request        the HTTP request
+   * @param response       the HTTP response
+   * @param authentication the authentication object
+   * @throws IOException      if an I/O error occurs
+   * @throws ServletException if a servlet error occurs
+   */
   @Override
   public void onAuthenticationSuccess(
       HttpServletRequest request,
@@ -35,10 +47,16 @@ public class OAuth2AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHand
       return;
     }
 
-    // clearAuthenticationAttributes(request, response);
+    clearAuthenticationAttributes(request, response);
     getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 
+  /**
+   * Determines the target URL for the OAuth2 authentication
+   * 
+   * @param authentication the authentication object
+   * @return the target URL
+   */
   private String determineTargetUrl(Authentication authentication) {
     User user = (User) authentication.getPrincipal();
     String token = jwtTokenProvider.generateToken(user);
@@ -49,6 +67,12 @@ public class OAuth2AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         .toUriString();
   }
 
+  /**
+   * Clears the authentication attributes
+   * 
+   * @param request  the HTTP request
+   * @param response the HTTP response
+   */
   protected void clearAuthenticationAttributes(
       HttpServletRequest request,
       HttpServletResponse response) {

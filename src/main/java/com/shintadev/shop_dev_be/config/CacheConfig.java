@@ -18,6 +18,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Configuration for Redis caching
+ */
 @Configuration
 @RequiredArgsConstructor
 public class CacheConfig {
@@ -25,6 +28,12 @@ public class CacheConfig {
   @Value("${app.cache.product.ttl}")
   private long timeToLive;
 
+  /**
+   * Creates a new RedisTemplate bean
+   * 
+   * @param redisConnectionFactory the RedisConnectionFactory
+   * @return the RedisTemplate bean
+   */
   @Bean
   public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
     RedisTemplate<String, Object> template = new RedisTemplate<>();
@@ -39,6 +48,12 @@ public class CacheConfig {
     return template;
   }
 
+  /**
+   * Creates a new CacheManager bean
+   * 
+   * @param redisConnectionFactory the RedisConnectionFactory
+   * @return the CacheManager bean
+   */
   @Bean
   public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
     RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()

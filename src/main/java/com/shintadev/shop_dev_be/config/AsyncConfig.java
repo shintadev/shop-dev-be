@@ -7,10 +7,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+/**
+ * Configuration for asynchronous tasks
+ */
 @Configuration
 @EnableAsync
 public class AsyncConfig {
 
+  /**
+   * Creates a new task executor bean
+   * 
+   * @return the task executor bean
+   */
   @Bean(name = "taskExecutor")
   public Executor taskExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -22,6 +30,11 @@ public class AsyncConfig {
     return executor;
   }
 
+  /**
+   * Creates a new email executor bean
+   * 
+   * @return the email executor bean
+   */
   @Bean(name = "emailExecutor")
   public Executor emailExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

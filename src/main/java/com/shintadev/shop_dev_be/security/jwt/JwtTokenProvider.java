@@ -23,6 +23,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Provides JWT token generation and validation
+ */
 @Component
 @Slf4j
 @Getter
@@ -36,6 +39,9 @@ public class JwtTokenProvider {
 
   private SecretKey secretKey;
 
+  /**
+   * Initializes the JwtTokenProvider
+   */
   @PostConstruct
   public void init() {
     try {
@@ -47,6 +53,12 @@ public class JwtTokenProvider {
     }
   }
 
+  /**
+   * Generates a JWT token for a user
+   * 
+   * @param userDetails the user details
+   * @return the JWT token
+   */
   public String generateToken(UserDetails userDetails) {
     long now = System.currentTimeMillis();
 
@@ -58,6 +70,12 @@ public class JwtTokenProvider {
         .compact();
   }
 
+  /**
+   * Resolves the JWT token from the request
+   * 
+   * @param request the HTTP request
+   * @return the JWT token
+   */
   public String resolveToken(HttpServletRequest request) {
     String bearerToken = request.getHeader("Authorization");
     if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
@@ -66,6 +84,12 @@ public class JwtTokenProvider {
     return null;
   }
 
+  /**
+   * Validates a JWT token
+   * 
+   * @param token the JWT token
+   * @return true if the token is valid, false otherwise
+   */
   public boolean validateToken(String token) {
     try {
       getClaimsFromToken(token);
@@ -84,21 +108,53 @@ public class JwtTokenProvider {
     return false;
   }
 
+  /**
+   * Checks if a JWT token is expired, throws an exception if it is. Recommended
+   * to
+   * use {@link #validateToken(String)} instead or handle the exception yourself.
+   * 
+   * @param token the JWT token
+   * @return true if the token is expired, false otherwise
+   */
   public boolean isTokenExpired(String token) {
     return getExpirationDateFromToken(token)
         .before(new Date());
   }
 
+  /**
+   * Gets the username from a JWT token, throws an exception if the token is
+   * invalid. Recommended to use {@link #validateToken(String)} instead or
+   * handle the exception yourself.
+   * 
+   * @param token the JWT token
+   * @return the username
+   */
   public String getUsernameFromToken(String token) {
     return getClaimsFromToken(token)
         .getSubject();
   }
 
+  /**
+   * Gets the expiration date from a JWT token, throws an exception if the token
+   * is invalid. Recommended to use {@link #validateToken(String)} instead or
+   * handle the exception yourself.
+   * 
+   * @param token the JWT token
+   * @return the expiration date
+   */
   public Date getExpirationDateFromToken(String token) {
     return getClaimsFromToken(token)
         .getExpiration();
   }
 
+  /**
+   * Gets the claims from a JWT token, throws an exception if the token is
+   * invalid. Recommended to use {@link #validateToken(String)} instead or
+   * handle the exception yourself.
+   * 
+   * @param token the JWT token
+   * @return the claims
+   */
   public Claims getClaimsFromToken(String token) {
     try {
       return Jwts.parserBuilder()

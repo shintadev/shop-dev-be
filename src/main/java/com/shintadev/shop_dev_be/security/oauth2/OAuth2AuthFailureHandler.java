@@ -14,11 +14,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Handles OAuth2 authentication failures
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2AuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
+  /**
+   * Handles OAuth2 authentication failures
+   * 
+   * @param request   the HTTP request
+   * @param response  the HTTP response
+   * @param exception the authentication exception
+   * @throws IOException      if an I/O error occurs
+   * @throws ServletException if a servlet error occurs
+   */
   @Override
   public void onAuthenticationFailure(
       HttpServletRequest request,
@@ -30,6 +42,12 @@ public class OAuth2AuthFailureHandler extends SimpleUrlAuthenticationFailureHand
     getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 
+  /**
+   * Clears the authentication attributes
+   * 
+   * @param request  the HTTP request
+   * @param response the HTTP response
+   */
   protected void clearAuthenticationAttributes(
       HttpServletRequest request,
       HttpServletResponse response) {

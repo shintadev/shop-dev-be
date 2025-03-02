@@ -19,6 +19,7 @@ import com.shintadev.shop_dev_be.domain.dto.request.product.ProductRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.product.ProductResponse;
 import com.shintadev.shop_dev_be.domain.model.entity.product.Product;
 import com.shintadev.shop_dev_be.domain.model.enums.product.ProductStatus;
+import com.shintadev.shop_dev_be.exception.ResourceNotFoundException;
 import com.shintadev.shop_dev_be.repository.product.ProductRepo;
 import com.shintadev.shop_dev_be.service.product.ProductService;
 
@@ -54,7 +55,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Fetching product details for slug: {}", slug);
     return productRepo.findBySlugAndActive(slug)
         .map(productMapper::toProductResponse)
-        .orElseThrow(() -> new RuntimeException("Product not found"));
+        .orElseThrow(() -> ResourceNotFoundException.create("Product", "slug", slug));
   }
 
   @Override
@@ -64,7 +65,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Fetching related products for slug {} with limit {}", slug, limit);
 
     Product product = productRepo.findBySlugAndActive(slug)
-        .orElseThrow(() -> new RuntimeException("Product not found"));
+        .orElseThrow(() -> ResourceNotFoundException.create("Product", "slug", slug));
 
     List<Product> relatedProducts;
     if (product.getCategory() != null) {
@@ -150,7 +151,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Updating product with ID {} to {}", id, productRequest);
 
     Product product = productRepo.findByIdForUpdate(id)
-        .orElseThrow(() -> new RuntimeException("Product not found"));
+        .orElseThrow(() -> ResourceNotFoundException.create("Product", "id", id));
 
     productMapper.updateProductFromRequest(productRequest, product);
 
@@ -177,7 +178,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Deleting product with ID: {}", id);
 
     Product product = productRepo.findByIdForUpdate(id)
-        .orElseThrow(() -> new RuntimeException("Product not found"));
+        .orElseThrow(() -> ResourceNotFoundException.create("Product", "id", id));
 
     product.setStatus(ProductStatus.DELETED);
 
@@ -189,7 +190,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Refreshing product cache for ID: {}", productId);
 
     Product product = productRepo.findByIdForUpdate(productId)
-        .orElseThrow(() -> new RuntimeException("Product not found"));
+        .orElseThrow(() -> ResourceNotFoundException.create("Product", "id", productId));
 
     getProductBySlug(product.getSlug());
   }

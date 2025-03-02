@@ -18,6 +18,9 @@ import com.shintadev.shop_dev_be.security.oauth2.OAuth2UserService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Security configuration for the application
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -31,6 +34,12 @@ public class SecurityConfig {
   private final OAuth2AuthSuccessHandler oAuth2AuthSuccessHandler;
   private final OAuth2AuthFailureHandler oAuth2AuthFailureHandler;
 
+  /**
+   * Creates a new SecurityFilterChain bean
+   * 
+   * @param http the HttpSecurity object
+   * @return the SecurityFilterChain bean
+   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http

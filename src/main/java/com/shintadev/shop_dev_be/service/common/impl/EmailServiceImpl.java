@@ -16,6 +16,9 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service for sending emails
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,6 +27,14 @@ public class EmailServiceImpl implements EmailService {
   private final JavaMailSender mailSender;
   private final TemplateEngine templateEngine;
 
+  /**
+   * Sends a verification email asynchronously
+   * 
+   * @param to               the email address
+   * @param name             the name
+   * @param subject          the subject
+   * @param verificationLink the verification link
+   */
   @Async("emailExecutor")
   @Override
   public void sendVerificationEmail(
@@ -52,6 +63,14 @@ public class EmailServiceImpl implements EmailService {
     }
   }
 
+  /**
+   * Sends a password reset email asynchronously
+   * 
+   * @param to        the email address
+   * @param name      the name
+   * @param subject   the subject
+   * @param resetLink the reset link
+   */
   @Async("emailExecutor")
   @Override
   public void sendPasswordResetEmail(
@@ -80,35 +99,36 @@ public class EmailServiceImpl implements EmailService {
     }
   }
 
+  /**
+   * Sends a welcome email asynchronously
+   * 
+   * @param to      the email address
+   * @param name    the name
+   * @param subject the subject
+   */
   @Async("emailExecutor")
   @Override
-  public void sendOrderConfirmationEmail(
+  public void sendWelcomeEmail(
       String to,
       String name,
-      String subject,
-      Long orderId,
-      String orderDate,
-      Double totalAmount) {
+      String subject) {
     try {
       MimeMessage mimeMessage = mailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
 
       Context context = new Context();
       context.setVariable("name", name);
-      context.setVariable("orderId", orderId);
-      context.setVariable("orderDate", orderDate);
-      context.setVariable("totalAmount", totalAmount);
 
-      String htmlContent = templateEngine.process("email/order-confirmation", context);
+      String htmlContent = templateEngine.process("email/welcome", context);
 
       helper.setTo(to);
       helper.setSubject(subject);
       helper.setText(htmlContent, true);
 
       mailSender.send(mimeMessage);
-      log.info("Order confirmation email sent to: {}", to);
+      log.info("Welcome email sent to: {}", to);
     } catch (MessagingException e) {
-      log.error("Failed to send order confirmation email", e);
+      log.error("Failed to send welcome email", e);
     }
   }
 }

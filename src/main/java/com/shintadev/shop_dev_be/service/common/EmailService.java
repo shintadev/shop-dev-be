@@ -14,11 +14,8 @@ public interface EmailService {
       String subject,
       String resetLink);
 
-  void sendOrderConfirmationEmail(
+  void sendWelcomeEmail(
       String to,
       String name,
-      String subject,
-      Long orderId,
-      String orderDate,
-      Double totalAmount);
+      String subject);
 }

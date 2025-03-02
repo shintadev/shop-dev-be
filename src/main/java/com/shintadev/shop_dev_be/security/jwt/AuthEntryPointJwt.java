@@ -17,10 +17,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Authentication entry point for JWT authentication
+ */
 @Component
 @Slf4j
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
+  /**
+   * Commences the authentication process
+   * 
+   * @param request       the HTTP request
+   * @param response      the HTTP response
+   * @param authException the authentication exception
+   */
   @Override
   public void commence(
       HttpServletRequest request,

@@ -15,12 +15,20 @@ import com.github.slugify.Slugify;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Application configuration
+ */
 @Configuration
 @RequiredArgsConstructor
 public class AppConfig {
 
   private final UserDetailsService userDetailsService;
 
+  /**
+   * Creates a new BCryptPasswordEncoder bean
+   * 
+   * @return the BCryptPasswordEncoder bean
+   */
   @Bean
   public BCryptPasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder() {
@@ -38,6 +46,11 @@ public class AppConfig {
     };
   }
 
+  /**
+   * Creates a new AuthenticationProvider bean
+   * 
+   * @return the AuthenticationProvider bean
+   */
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -46,11 +59,22 @@ public class AppConfig {
     return authProvider;
   }
 
+  /**
+   * Creates a new AuthenticationManager bean
+   * 
+   * @param config the AuthenticationConfiguration
+   * @return the AuthenticationManager bean
+   */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
     return config.getAuthenticationManager();
   }
 
+  /**
+   * Creates a new Slugify bean
+   * 
+   * @return the Slugify bean
+   */
   @Bean
   public Slugify slugify() {
     return Slugify.builder()

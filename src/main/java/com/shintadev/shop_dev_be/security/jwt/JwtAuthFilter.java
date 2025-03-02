@@ -19,6 +19,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * JWT authentication filter
+ */
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +31,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
   private final UserDetailsService userDetailsService;
 
+  /**
+   * Filters the request
+   * 
+   * @param request     the HTTP request
+   * @param response    the HTTP response
+   * @param filterChain the filter chain
+   */
   @Override
   protected void doFilterInternal(
       @NonNull HttpServletRequest request,
