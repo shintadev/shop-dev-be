@@ -24,6 +24,11 @@
       "name": "app.cache.product.ttl",
       "type": "java.lang.Long",
       "description": "A description for 'app.cache.product.ttl'"
+    },
+    {
+      "name": "app.redisson.lock.watchdog-timeout",
+      "type": "java.lang.String",
+      "description": "A description for 'app.redisson.lock.watchdog-timeout'"
     }
   ]
 }

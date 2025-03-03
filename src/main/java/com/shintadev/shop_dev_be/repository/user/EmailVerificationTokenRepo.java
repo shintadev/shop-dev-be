@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 
 import com.shintadev.shop_dev_be.domain.model.entity.user.EmailVerificationToken;
 
+/**
+ * Repository for managing email verification tokens
+ */
 @Repository
 public interface EmailVerificationTokenRepo extends JpaRepository<EmailVerificationToken, UUID> {
 

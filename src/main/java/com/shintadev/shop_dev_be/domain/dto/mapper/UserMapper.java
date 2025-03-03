@@ -22,6 +22,7 @@ public interface UserMapper {
   @Mapping(target = "avatarUrl", ignore = true)
   @Mapping(target = "displayName", expression = "java(request.getDisplayName() == null ? request.getFirstName() + ' ' + request.getLastName() : request.getDisplayName())")
   @Mapping(target = "roles", ignore = true)
+  @Mapping(target = "cart", ignore = true)
   User toUser(UserRequest request);
 
   UserResponse toUserResponse(User user);

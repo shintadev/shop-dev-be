@@ -44,6 +44,10 @@ app:
   cache:
     product:
       ttl: ${CACHE_PRODUCT_TTL}
+  redisson:
+    lock:
+      watchdog-timeout: ${REDIS_LOCK_WATCHDOG_TIMEOUT}
+
 
 logging:
   level:

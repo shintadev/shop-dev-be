@@ -12,13 +12,13 @@ import org.springframework.util.StringUtils;
 @Configuration
 public class RedissonConfig {
 
-  @Value("${spring.redis.host}")
+  @Value("${spring.data.redis.host}")
   private String host;
 
-  @Value("${spring.redis.port}")
+  @Value("${spring.data.redis.port}")
   private int port;
 
-  @Value("${spring.redis.password:#{null}}")
+  @Value("${spring.data.redis.password:#{null}}")
   private String password;
 
   @Value("${app.redisson.lock.watchdog-timeout:30000}")

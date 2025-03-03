@@ -1,5 +1,6 @@
 package com.shintadev.shop_dev_be.domain.model.entity.product;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import lombok.NoArgsConstructor;
 })
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class Product implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -89,7 +90,7 @@ public class Product {
   private LocalDateTime createdAt;
 
   @UpdateTimestamp
-  @Column(name = "updated_at", nullable = false)
+  @Column(name = "updated_at")
   private LocalDateTime updatedAt;
 
   @PrePersist

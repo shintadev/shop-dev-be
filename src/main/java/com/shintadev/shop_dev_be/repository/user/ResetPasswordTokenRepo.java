@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 
 import com.shintadev.shop_dev_be.domain.model.entity.user.ResetPasswordToken;
 
+/**
+ * Repository for managing reset password tokens
+ */
 @Repository
 public interface ResetPasswordTokenRepo extends JpaRepository<ResetPasswordToken, UUID> {
 

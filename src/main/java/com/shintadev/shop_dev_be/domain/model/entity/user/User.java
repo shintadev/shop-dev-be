@@ -10,8 +10,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.shintadev.shop_dev_be.domain.model.entity.cart.Cart;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -24,6 +27,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -83,8 +87,8 @@ public class User implements UserDetails {
   // true)
   // private List<Address> addresses = new ArrayList<>();
 
-  // @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  // private Cart cart;
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+  private Cart cart;
 
   // @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   // private Wishlist wishlist;
@@ -105,11 +109,11 @@ public class User implements UserDetails {
     if (displayName == null) {
       displayName = firstName + " " + lastName;
     }
-    // if (cart == null) {
-    // cart = Cart.builder()
-    // .user(this)
-    // .build();
-    // }
+    if (cart == null) {
+      cart = Cart.builder()
+          .user(this)
+          .build();
+    }
     // if (wishlist == null) {
     // wishlist = Wishlist.builder()
     // .user(this)

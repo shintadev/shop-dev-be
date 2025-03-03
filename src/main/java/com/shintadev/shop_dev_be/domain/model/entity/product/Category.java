@@ -1,5 +1,6 @@
 package com.shintadev.shop_dev_be.domain.model.entity.product;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "categories")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category {
+public class Category implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -63,6 +64,6 @@ public class Category {
   private LocalDateTime createdAt;
 
   @UpdateTimestamp
-  @Column(name = "updated_at", nullable = false)
+  @Column(name = "updated_at")
   private LocalDateTime updatedAt;
 }

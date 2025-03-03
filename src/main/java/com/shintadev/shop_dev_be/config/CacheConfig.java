@@ -11,15 +11,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.util.StringUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,24 +27,6 @@ public class CacheConfig {
 
   @Value("${app.cache.product.ttl}")
   private long timeToLive;
-
-  @Value("${spring.redis.host}")
-  private String host;
-
-  @Value("${spring.redis.port}")
-  private int port;
-
-  @Value("${spring.redis.password:#{null}}")
-  private String password;
-
-  @Bean
-  public RedisConnectionFactory redisConnectionFactory() {
-    RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
-    if (StringUtils.hasText(password)) {
-      config.setPassword(password);
-    }
-    return new LettuceConnectionFactory(config);
-  }
 
   /**
    * Creates a new RedisTemplate bean

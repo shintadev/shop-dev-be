@@ -11,6 +11,9 @@ import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 
 import jakarta.persistence.LockModeType;
 
+/**
+ * Repository for managing users
+ */
 @Repository
 public interface UserRepo extends JpaRepository<User, Long> {
 

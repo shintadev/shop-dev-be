@@ -1,5 +1,7 @@
 package com.shintadev.shop_dev_be.domain.model.entity.user;
 
+import java.io.Serializable;
+
 import com.shintadev.shop_dev_be.domain.model.enums.user.RoleName;
 
 import jakarta.persistence.Column;
@@ -21,7 +23,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "roles")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
+public class Role implements Serializable {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
