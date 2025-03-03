@@ -2,13 +2,20 @@ package com.shintadev.shop_dev_be.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import com.shintadev.shop_dev_be.domain.dto.response.ApiResponse;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -24,37 +31,111 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    * Handle ResourceNotFoundException
    */
   @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+  public ResponseEntity<ApiResponse> handleResourceNotFoundException(
       ResourceNotFoundException ex, WebRequest request) {
 
-    ErrorResponse errorResponse = new ErrorResponse(
-        HttpStatus.NOT_FOUND.value(),
-        ex.getMessage(),
-        request.getDescription(false),
-        LocalDateTime.now());
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .status(HttpStatus.NOT_FOUND.value())
+        .path(request.getDescription(false))
+        .timestamp(LocalDateTime.now())
+        .build();
 
-    return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiResponse.builder()
+            .success(false)
+            .message(ex.getMessage())
+            .data(errorResponse)
+            .build());
   }
 
   /**
-   * Handle ResponseStatusException
+   * Handle BadRequestException
    */
-  @ExceptionHandler(ResponseStatusException.class)
-  public ResponseEntity<ErrorResponse> handleResponseStatusException(
-      ResponseStatusException ex, WebRequest request) {
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ApiResponse> handleBadRequestException(
+      BadRequestException ex, WebRequest request) {
 
-    ErrorResponse errorResponse = new ErrorResponse(
-        ex.getStatusCode().value(),
-        ex.getReason(),
-        request.getDescription(false),
-        LocalDateTime.now());
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .status(HttpStatus.BAD_REQUEST.value())
+        .path(request.getDescription(false))
+        .timestamp(LocalDateTime.now())
+        .build();
 
-    return new ResponseEntity<>(errorResponse, ex.getStatusCode());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.builder()
+            .success(false)
+            .message(ex.getMessage())
+            .data(errorResponse)
+            .build());
+  }
+
+  /**
+   * Handle AuthenticationException
+   */
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ApiResponse> handleAuthenticationException(
+      AuthenticationException ex, WebRequest request) {
+
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .status(HttpStatus.UNAUTHORIZED.value())
+        .path(request.getDescription(false))
+        .timestamp(LocalDateTime.now())
+        .build();
+
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(ApiResponse.builder()
+            .success(false)
+            .message(ex.getMessage())
+            .data(errorResponse)
+            .build());
+  }
+
+  /**
+   * Handle BadCredentialsException
+   */
+  @ExceptionHandler(BadCredentialsException.class)
+  public ResponseEntity<ApiResponse> handleBadCredentialsException(
+      BadCredentialsException ex, WebRequest request) {
+
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .status(HttpStatus.UNAUTHORIZED.value())
+        .path(request.getDescription(false))
+        .timestamp(LocalDateTime.now())
+        .build();
+
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(ApiResponse.builder()
+            .success(false)
+            .message("Invalid credentials!")
+            .data(errorResponse)
+            .build());
+  }
+
+  /**
+   * Handle AccessDeniedException
+   */
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ApiResponse> handleAccessDeniedException(
+      AccessDeniedException ex, WebRequest request) {
+
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .status(HttpStatus.FORBIDDEN.value())
+        .path(request.getDescription(false))
+        .timestamp(LocalDateTime.now())
+        .build();
+
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(ApiResponse.builder()
+            .success(false)
+            .message("Access denied!")
+            .data(errorResponse)
+            .build());
   }
 
   /**
    * Handle validation errors
    */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex,
       WebRequest request) {
@@ -65,91 +146,59 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             FieldError::getDefaultMessage,
             (existingMessage, newMessage) -> existingMessage + ", " + newMessage));
 
-    ValidationErrorResponse errorResponse = new ValidationErrorResponse(
-        HttpStatus.BAD_REQUEST.value(),
-        "Validation failed",
-        request.getDescription(false),
-        LocalDateTime.now(),
-        errors);
+    ValidationErrorResponse errorResponse = ValidationErrorResponse.builder()
+        .status(HttpStatus.BAD_REQUEST.value())
+        .path(request.getDescription(false))
+        .timestamp(LocalDateTime.now())
+        .fieldErrors(errors)
+        .build();
 
-    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.builder()
+            .success(false)
+            .message("Validation failed")
+            .data(errorResponse)
+            .build());
   }
 
   /**
    * Handle all other exceptions
    */
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex, WebRequest request) {
-    ErrorResponse errorResponse = new ErrorResponse(
-        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        ex.getMessage(),
-        request.getDescription(false),
-        LocalDateTime.now());
+  public ResponseEntity<ApiResponse> handleGlobalException(Exception ex, WebRequest request) {
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+        .path(request.getDescription(false))
+        .timestamp(LocalDateTime.now())
+        .build();
 
-    return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(ApiResponse.builder()
+            .success(false)
+            .message(ex.getMessage())
+            .data(errorResponse)
+            .build());
   }
 
   /**
    * Base error response class
    */
+  @Data
+  @SuperBuilder
   public static class ErrorResponse {
     private int status;
-    private String message;
     private String path;
     private LocalDateTime timestamp;
-
-    public ErrorResponse(int status, String message, String path, LocalDateTime timestamp) {
-      this.status = status;
-      this.message = message;
-      this.path = path;
-      this.timestamp = timestamp;
-    }
-
-    // Getters and setters
-    public int getStatus() {
-      return status;
-    }
-
-    public void setStatus(int status) {
-      this.status = status;
-    }
-
-    public String getMessage() {
-      return message;
-    }
-
-    public void setMessage(String message) {
-      this.message = message;
-    }
-
-    public String getPath() {
-      return path;
-    }
-
-    public void setPath(String path) {
-      this.path = path;
-    }
-
-    public LocalDateTime getTimestamp() {
-      return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-      this.timestamp = timestamp;
-    }
   }
 
   /**
    * Error response for validation errors
    */
+  @Data
+  @SuperBuilder
+  @EqualsAndHashCode(callSuper = true)
   public static class ValidationErrorResponse extends ErrorResponse {
     private Map<String, String> fieldErrors;
-
-    public ValidationErrorResponse(int status, String message, String path,
-        LocalDateTime timestamp, Map<String, String> fieldErrors) {
-      super(status, message, path, timestamp);
-      this.fieldErrors = fieldErrors;
-    }
 
     public Map<String, String> getFieldErrors() {
       return fieldErrors;
