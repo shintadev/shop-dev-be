@@ -14,23 +14,21 @@ import lombok.Data;
 public class ProductRequest {
 
   @NotBlank(message = "Name is required")
-  @Size(max = 128, message = "Name must be less than 128 characters")
+  @Size(min = 3, max = 128, message = "Name must be between 3 and 128 characters")
   private String name;
 
-  @NotBlank(message = "Description is required")
-  @Size(max = 1000, message = "Description must be less than 1000 characters")
+  @Size(max = 5000, message = "Description must be less than 5000 characters")
   private String description;
 
   @NotNull(message = "Price is required")
-  @DecimalMin(value = "0.00", message = "Price must be greater than 0")
+  @DecimalMin(value = "0.01", message = "Price must be greater than 0")
   private BigDecimal price;
 
-  @DecimalMin(value = "0.00", message = "Discount price must be greater than 0")
   private BigDecimal discountPrice;
 
   @NotNull(message = "Stock is required")
   @Min(value = 0, message = "Stock must be greater than 0")
-  private int stock;
+  private Integer stock;
 
   @NotNull(message = "Images are required")
   @Size(min = 1, message = "At least one image is required")

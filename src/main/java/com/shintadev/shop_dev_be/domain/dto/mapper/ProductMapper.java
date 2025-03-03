@@ -20,18 +20,25 @@ public interface ProductMapper {
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
-  @Mapping(target = "category", ignore = true)
   @Mapping(target = "slug", ignore = true)
+  @Mapping(target = "images", ignore = true)
   @Mapping(target = "status", ignore = true)
+  @Mapping(target = "category", ignore = true)
   Product toProduct(ProductRequest request);
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
-  @Mapping(target = "category", ignore = true)
   @Mapping(target = "slug", ignore = true)
+  @Mapping(target = "images", ignore = true)
   @Mapping(target = "status", ignore = true)
+  @Mapping(target = "category", ignore = true)
   void updateProductFromRequest(ProductRequest request, @MappingTarget Product product);
 
+  @Mapping(target = "categoryId", source = "category.id")
+  @Mapping(target = "categoryName", source = "category.name")
+  @Mapping(target = "categorySlug", source = "category.slug")
+  @Mapping(target = "inStock", expression = "java(product.getStock() > 0)")
+  @Mapping(target = "onSale", expression = "java(product.getDiscountPrice() != null && product.getDiscountPrice().compareTo(product.getPrice()) < 0)")
   ProductResponse toProductResponse(Product product);
 }

@@ -7,8 +7,10 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,7 +34,7 @@ public class Category {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "name", length = 128, nullable = false)
+  @Column(name = "name", length = 128, nullable = false, unique = true)
   private String name;
 
   @Column(name = "slug", nullable = false, unique = true)
@@ -41,18 +43,18 @@ public class Category {
   @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
-  @Column(name = "image_url", length = 255)
+  @Column(name = "image_url")
   private String imageUrl;
 
   @Column(name = "is_active", nullable = false)
   @Builder.Default
   private boolean active = true;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parent_id")
   private Category parent;
 
-  @OneToMany(mappedBy = "parent")
+  @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
   private List<Category> children = new ArrayList<>();
 

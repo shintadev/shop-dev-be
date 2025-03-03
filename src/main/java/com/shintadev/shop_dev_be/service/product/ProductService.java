@@ -5,30 +5,37 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.shintadev.shop_dev_be.domain.dto.request.product.ProductFilterRequest;
+import com.shintadev.shop_dev_be.domain.dto.request.product.ProductSearchCriteria;
 import com.shintadev.shop_dev_be.domain.dto.request.product.ProductRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.product.ProductResponse;
 
 public interface ProductService {
 
-  Page<ProductResponse> getAllProducts(Pageable pageable);
+  Page<ProductResponse> getActiveProducts(Pageable pageable);
+
+  List<ProductResponse> getFeaturedProducts(int limit);
 
   ProductResponse getProductBySlug(String slug);
 
-  List<ProductResponse> getRelatedProducts(String slug, int limit);
+  Page<ProductResponse> getProductsByCategory(Long categoryId, Pageable pageable);
+
+  List<ProductResponse> getRelatedProducts(Long id, int limit);
 
   Page<ProductResponse> searchProducts(String keyword, Pageable pageable);
 
-  Page<ProductResponse> filterProducts(ProductFilterRequest filterRequest, Pageable pageable);
+  Page<ProductResponse> filterProducts(ProductSearchCriteria searchCriteria, Pageable pageable);
 
-  // Admin methods
+  // ==================== Admin Methods ====================
+
+  Page<ProductResponse> getAllProducts(Pageable pageable);
+
   ProductResponse createProduct(ProductRequest productRequest);
 
   ProductResponse updateProduct(Long id, ProductRequest productRequest);
 
   void deleteProduct(Long id);
 
-  void refreshProductCache(Long productId);
+  void refreshProductCache(String slug);
 
   void clearProductCaches();
 }

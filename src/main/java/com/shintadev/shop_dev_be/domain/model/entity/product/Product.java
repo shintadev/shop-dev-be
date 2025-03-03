@@ -16,11 +16,13 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -50,6 +52,7 @@ public class Product {
   @Column(name = "slug", nullable = false, unique = true)
   private String slug;
 
+  @Lob
   @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
@@ -77,12 +80,12 @@ public class Product {
   @Builder.Default
   private Boolean featured = false;
 
-  @ManyToOne
-  @JoinColumn(name = "category_id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "category_id", nullable = false)
   private Category category;
 
   @CreationTimestamp
-  @Column(name = "created_at", nullable = false)
+  @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @UpdateTimestamp

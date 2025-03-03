@@ -4,15 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class ProductResponse {
   private Long id;
   private String name;
@@ -20,10 +16,14 @@ public class ProductResponse {
   private String description;
   private BigDecimal price;
   private BigDecimal discountPrice;
-  private int stock;
+  private Integer stock;
   private List<String> images;
   private boolean featured;
-  // private CategoryResponse category;
+  private boolean inStock;
+  private boolean onSale;
+  private Long categoryId;
+  private String categoryName;
+  private String categorySlug;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 }
