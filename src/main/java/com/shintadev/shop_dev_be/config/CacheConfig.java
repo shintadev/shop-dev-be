@@ -11,10 +11,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.StringUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +32,24 @@ public class CacheConfig {
 
   @Value("${app.cache.product.ttl}")
   private long timeToLive;
+
+  @Value("${spring.redis.host}")
+  private String host;
+
+  @Value("${spring.redis.port}")
+  private int port;
+
+  @Value("${spring.redis.password:#{null}}")
+  private String password;
+
+  @Bean
+  public RedisConnectionFactory redisConnectionFactory() {
+    RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
+    if (StringUtils.hasText(password)) {
+      config.setPassword(password);
+    }
+    return new LettuceConnectionFactory(config);
+  }
 
   /**
    * Creates a new RedisTemplate bean
@@ -56,17 +79,26 @@ public class CacheConfig {
    */
   @Bean
   public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+    // Default cache configuration
     RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofMillis(timeToLive))
         .disableCachingNullValues()
-        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+        .serializeKeysWith(
+            RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
         .serializeValuesWith(
             RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
+    // Cache configurations for different caches
     Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
-    cacheConfigs.put("product", defaultCacheConfig.entryTtl(Duration.ofHours(2)));
-    cacheConfigs.put("category", defaultCacheConfig.entryTtl(Duration.ofHours(2)));
-    cacheConfigs.put("product-by-category", defaultCacheConfig.entryTtl(Duration.ofHours(2)));
+
+    // Product: stable cache
+    cacheConfigs.put("products", defaultCacheConfig.entryTtl(Duration.ofHours(2)));
+
+    // Category: less frequently updated cache
+    cacheConfigs.put("category", defaultCacheConfig.entryTtl(Duration.ofHours(24)));
+
+    // Product by category: frequently updated cache
+    cacheConfigs.put("product-by-category", defaultCacheConfig.entryTtl(Duration.ofHours(1)));
 
     return RedisCacheManager.builder(redisConnectionFactory)
         .cacheDefaults(defaultCacheConfig)
@@ -74,5 +106,4 @@ public class CacheConfig {
         .transactionAware()
         .build();
   }
-
 }

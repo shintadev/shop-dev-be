@@ -13,7 +13,7 @@
 
 	<groupId>com.shintadev</groupId>
 	<artifactId>shop-dev-be</artifactId>
-	<version>0.0.15-SNAPSHOT</version>
+	<version>0.0.16-SNAPSHOT</version>
 	<name>shop-dev-be</name>
 	<description>Sample shop web RESTful API using Spring Boot</description>
 	<url>https://github.com/shintadev/shop-dev-be</url>
@@ -45,6 +45,7 @@
 		<spring.boot.version>3.3.5</spring.boot.version>
 		<jjwt.version>0.11.5</jjwt.version>
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
+		<redisson.version>3.26.1</redisson.version>
 	</properties>
 
 	<dependencyManagement>
@@ -98,6 +99,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.redisson</groupId>
+			<artifactId>redisson-spring-boot-starter</artifactId>
+			<version>${redisson.version}</version>
 		</dependency>
 
 		<!-- Kafka -->
