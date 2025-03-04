@@ -28,12 +28,18 @@ import lombok.RequiredArgsConstructor;
  * @since 2025-03-03
  */
 @RestController
-@RequestMapping("/cart")
+@RequestMapping("/carts")
 @RequiredArgsConstructor
 public class CartController {
 
   private final CartService cartService;
 
+  /**
+   * Get the cart of the user
+   * 
+   * @param user the authenticated user
+   * @return the cart of the user
+   */
   @GetMapping
   public ResponseEntity<ApiResponse> getCart(@AuthenticationPrincipal User user) {
     var cart = cartService.getCart(user.getId());
@@ -44,6 +50,13 @@ public class CartController {
             .build());
   }
 
+  /**
+   * Add an item to the cart
+   * 
+   * @param user    the authenticated user
+   * @param request the request containing the product ID and quantity
+   * @return the updated cart
+   */
   @PostMapping("/add")
   public ResponseEntity<ApiResponse> addItemToCart(
       @AuthenticationPrincipal User user,
@@ -56,6 +69,13 @@ public class CartController {
             .build());
   }
 
+  /**
+   * Update an item in the cart
+   * 
+   * @param user    the authenticated user
+   * @param request the request containing the product ID and quantity
+   * @return the updated cart
+   */
   @PutMapping("/update")
   public ResponseEntity<ApiResponse> updateItemInCart(
       @AuthenticationPrincipal User user,
@@ -68,26 +88,47 @@ public class CartController {
             .build());
   }
 
+  /**
+   * Remove an item from the cart
+   * 
+   * @param user      the authenticated user
+   * @param productId the ID of the product
+   * @return the updated cart
+   */
   @DeleteMapping("/remove")
   public ResponseEntity<ApiResponse> removeItemFromCart(
       @AuthenticationPrincipal User user,
       @RequestParam Long productId) {
-    cartService.removeItemFromCart(user.getId(), productId);
+    var cart = cartService.removeItemFromCart(user.getId(), productId);
     return ResponseEntity.status(HttpStatus.OK)
         .body(ApiResponse.builder()
             .message("Item removed from cart successfully")
+            .data(cart)
             .build());
   }
 
+  /**
+   * Clear the cart
+   * 
+   * @param user the authenticated user
+   * @return the updated cart
+   */
   @DeleteMapping("/clear")
   public ResponseEntity<ApiResponse> clearCart(@AuthenticationPrincipal User user) {
-    cartService.clearCart(user.getId());
+    var cart = cartService.clearCart(user.getId());
     return ResponseEntity.status(HttpStatus.OK)
         .body(ApiResponse.builder()
             .message("Cart cleared successfully")
+            .data(cart)
             .build());
   }
 
+  /**
+   * Get the number of items in the cart
+   * 
+   * @param user the authenticated user
+   * @return the number of items in the cart
+   */
   @GetMapping("/count")
   public ResponseEntity<ApiResponse> getCartItemCount(@AuthenticationPrincipal User user) {
     var count = cartService.getCartItemCount(user.getId());

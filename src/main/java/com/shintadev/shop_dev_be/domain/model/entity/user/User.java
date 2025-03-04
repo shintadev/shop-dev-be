@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.shintadev.shop_dev_be.domain.model.entity.cart.Cart;
+import com.shintadev.shop_dev_be.domain.model.entity.wishlist.Wishlist;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 
 import jakarta.persistence.CascadeType;
@@ -90,8 +91,8 @@ public class User implements UserDetails {
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private Cart cart;
 
-  // @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  // private Wishlist wishlist;
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+  private Wishlist wishlist;
 
   // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   // private List<Order> orders = new ArrayList<>();
@@ -114,11 +115,11 @@ public class User implements UserDetails {
           .user(this)
           .build();
     }
-    // if (wishlist == null) {
-    // wishlist = Wishlist.builder()
-    // .user(this)
-    // .build();
-    // }
+    if (wishlist == null) {
+      wishlist = Wishlist.builder()
+          .user(this)
+          .build();
+    }
   }
 
   @Override

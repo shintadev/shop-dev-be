@@ -22,7 +22,4 @@ public interface CartRepo extends JpaRepository<Cart, Long> {
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT c FROM Cart c WHERE c.user.id = :userId")
   Optional<Cart> findByUserIdForUpdate(Long userId);
-
-  @Query("SELECT c FROM Cart c JOIN FETCH c.items WHERE c.user.id = :userId")
-  Optional<Cart> findByUserIdWithItems(Long userId);
 }

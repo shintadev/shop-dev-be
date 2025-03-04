@@ -28,6 +28,9 @@ import com.shintadev.shop_dev_be.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service for managing carts
+ */
 @Service
 @Slf4j
 @Transactional
@@ -41,13 +44,39 @@ public class CartServiceImpl implements CartService {
   private final UserRepo userRepo;
   private final RedissonClient redissonClient;
 
+  /**
+   * Get the cart of the user
+   * 
+   * @param userId the ID of the user
+   * @return the cart dto of the user
+   */
   @Override
   @Transactional(readOnly = true)
   public CartResponse getCart(Long userId) {
-    Cart cart = getUserCart(userId);
+    // 1. Get user
+    User user = userRepo.findById(userId)
+        .orElseThrow(() -> ResourceNotFoundException.create("User", "id", userId.toString()));
+
+    // 2. Get cart
+    Cart cart = cartRepo.findByUserId(userId)
+        .orElseGet(() -> {
+          Cart newCart = Cart.builder()
+              .user(user)
+              .build();
+          return cartRepo.save(newCart);
+        });
+
+    // 3. Return cart
     return cartMapper.toCartResponse(cart);
   }
 
+  /**
+   * Add an item to the cart
+   * 
+   * @param userId  the ID of the user
+   * @param request the request containing the product ID and quantity
+   * @return the updated cart
+   */
   @Override
   public CartResponse addItemToCart(Long userId, CartItemRequest request) {
     // 1. Get lock
@@ -93,10 +122,11 @@ public class CartServiceImpl implements CartService {
               .product(product)
               .quantity(request.getQuantity())
               .build();
+          cart.getItems().add(cartItem);
         }
 
-        // 9. Save cart item
-        cartItemRepo.save(cartItem);
+        // 9. Save cart
+        cart = cartRepo.save(cart);
 
         // 10. Update cart total price
         updateCartTotalPrice(cart);
@@ -113,6 +143,13 @@ public class CartServiceImpl implements CartService {
     }
   }
 
+  /**
+   * Update an item in the cart
+   * 
+   * @param userId  the ID of the user
+   * @param request the request containing the product ID and quantity
+   * @return the updated cart
+   */
   @Override
   public CartResponse updateItemInCart(Long userId, CartItemRequest request) {
     // 1. Get lock
@@ -164,6 +201,13 @@ public class CartServiceImpl implements CartService {
     }
   }
 
+  /**
+   * Remove an item from the cart
+   * 
+   * @param userId    the ID of the user
+   * @param productId the ID of the product
+   * @return the updated cart
+   */
   @Override
   public CartResponse removeItemFromCart(Long userId, Long productId) {
     // 1. Get lock
@@ -187,15 +231,17 @@ public class CartServiceImpl implements CartService {
 
         // 5. Delete cart item
         cart.getItems().remove(cartItem);
-        cartItemRepo.delete(cartItem);
 
-        // 6. Update cart total price
+        // 6. Save cart
+        cart = cartRepo.save(cart);
+
+        // 7. Update cart total price
         updateCartTotalPrice(cart);
 
-        // 7. Return cart response
+        // 8. Return cart response
         return cartMapper.toCartResponse(cart);
       } finally {
-        // 8. Release lock
+        // 9. Release lock
         lock.unlock();
       }
     } catch (InterruptedException e) {
@@ -204,6 +250,12 @@ public class CartServiceImpl implements CartService {
     }
   }
 
+  /**
+   * Clear the cart
+   * 
+   * @param userId the ID of the user
+   * @return the updated cart
+   */
   @Override
   public CartResponse clearCart(Long userId) {
     // 1. Get lock
@@ -228,7 +280,7 @@ public class CartServiceImpl implements CartService {
         cart.setTotalPrice(BigDecimal.ZERO);
 
         // 6. Save cart
-        cartRepo.save(cart);
+        cart = cartRepo.save(cart);
 
         // 7. Return cart response
         return cartMapper.toCartResponse(cart);
@@ -242,18 +294,30 @@ public class CartServiceImpl implements CartService {
     }
   }
 
+  /**
+   * Get the number of items in the cart
+   * 
+   * @param userId the ID of the user
+   * @return the number of items in the cart
+   */
   @Override
   public Long getCartItemCount(Long userId) {
     return cartItemRepo.countByUserId(userId);
   }
 
+  /**
+   * Get the cart of the user
+   * 
+   * @param userId the ID of the user
+   * @return the cart entity of the user
+   */
   private Cart getUserCart(Long userId) {
     // 1. Check if user exists
     User user = userRepo.findById(userId)
         .orElseThrow(() -> ResourceNotFoundException.create("User", "id", userId.toString()));
 
     // 2. Get or create cart
-    return cartRepo.findByUserId(userId)
+    return cartRepo.findByUserIdForUpdate(userId)
         .orElseGet(() -> {
           Cart newCart = Cart.builder()
               .user(user)
@@ -262,6 +326,11 @@ public class CartServiceImpl implements CartService {
         });
   }
 
+  /**
+   * Update the total price of the cart
+   * 
+   * @param cart the cart to update
+   */
   private void updateCartTotalPrice(Cart cart) {
     // 1. Calculate total price
     BigDecimal totalPrice = cart.getItems().stream()

@@ -55,11 +55,11 @@ public class SecurityConfig {
             .requestMatchers("/host").permitAll()
             .requestMatchers("/auth/**").permitAll()
             .requestMatchers("/products/**").permitAll()
+            .requestMatchers("/categories/**").permitAll()
             // Secured endpoints
             .requestMatchers("/users/**").hasRole("USER")
             .requestMatchers("/orders/**").hasRole("USER")
             .requestMatchers("/payments/**").hasRole("USER")
-            .requestMatchers("/reviews/**").hasRole("USER")
             .requestMatchers("/carts/**").hasRole("USER")
             .requestMatchers("/addresses/**").hasRole("USER")
             .requestMatchers("/wishlists/**").hasRole("USER")
