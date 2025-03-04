@@ -2,6 +2,7 @@ package com.shintadev.shop_dev_be.domain.dto.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
@@ -19,6 +20,10 @@ public interface AddressMapper {
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "user", ignore = true)
   Address toAddress(AddressRequest request);
+
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "user", ignore = true)
+  void updateAddressFromRequest(AddressRequest request, @MappingTarget Address address);
 
   @Mapping(target = "userId", source = "user.id")
   @Mapping(target = "formattedAddress", expression = "java(formatAddress(address))")

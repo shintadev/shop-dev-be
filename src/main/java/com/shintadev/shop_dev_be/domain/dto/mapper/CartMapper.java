@@ -35,7 +35,7 @@ public interface CartMapper {
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "cart", ignore = true)
   @Mapping(target = "product", ignore = true)
-  CartItem updateCartItemFromRequest(CartItemRequest request, @MappingTarget CartItem cartItem);
+  void updateCartItemFromRequest(CartItemRequest request, @MappingTarget CartItem cartItem);
 
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "productId", source = "cartItem.product.id")

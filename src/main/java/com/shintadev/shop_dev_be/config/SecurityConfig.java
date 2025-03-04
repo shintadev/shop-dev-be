@@ -58,11 +58,11 @@ public class SecurityConfig {
             .requestMatchers("/categories/**").permitAll()
             // Secured endpoints
             .requestMatchers("/users/**").hasRole("USER")
+            .requestMatchers("/carts/**").hasRole("USER")
+            .requestMatchers("/wishlists/**").hasRole("USER")
+            .requestMatchers("/addresses/**").hasRole("USER")
             .requestMatchers("/orders/**").hasRole("USER")
             .requestMatchers("/payments/**").hasRole("USER")
-            .requestMatchers("/carts/**").hasRole("USER")
-            .requestMatchers("/addresses/**").hasRole("USER")
-            .requestMatchers("/wishlists/**").hasRole("USER")
             // Admin-only endpoints
             .requestMatchers("/admin/**").hasRole("ADMIN")
             // All other endpoints must be authenticated
