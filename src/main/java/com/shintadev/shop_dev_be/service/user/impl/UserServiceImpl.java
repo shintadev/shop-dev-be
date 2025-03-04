@@ -12,6 +12,7 @@ import com.shintadev.shop_dev_be.domain.dto.request.user.UserRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.user.UserResponse;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
+import com.shintadev.shop_dev_be.exception.BadRequestException;
 import com.shintadev.shop_dev_be.exception.ResourceNotFoundException;
 import com.shintadev.shop_dev_be.repository.user.RoleRepo;
 import com.shintadev.shop_dev_be.repository.user.UserRepo;
@@ -74,7 +75,7 @@ public class UserServiceImpl implements UserService {
   public UserResponse createUser(UserRequest request) {
     // 1. Check if email exists
     if (userRepo.existsByEmail(request.getEmail())) {
-      throw new RuntimeException("Email already exists");
+      throw new BadRequestException("Email already exists");
     }
     // 2. Map request to user
     User user = userMapper.toUser(request);

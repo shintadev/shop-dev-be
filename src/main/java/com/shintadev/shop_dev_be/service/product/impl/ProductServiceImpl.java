@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.github.slugify.Slugify;
+import com.shintadev.shop_dev_be.constant.ResourceName;
 import com.shintadev.shop_dev_be.domain.dto.mapper.ProductMapper;
 import com.shintadev.shop_dev_be.domain.dto.request.product.ProductSearchCriteria;
 import com.shintadev.shop_dev_be.domain.dto.request.product.ProductRequest;
@@ -93,7 +94,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Fetching product details for slug: {}", slug);
     return productRepo.findBySlugAndActive(slug)
         .map(productMapper::toProductResponse)
-        .orElseThrow(() -> ResourceNotFoundException.create("Product", "slug", slug));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.PRODUCT, "slug", slug));
   }
 
   /**
@@ -111,7 +112,7 @@ public class ProductServiceImpl implements ProductService {
         pageable.getPageNumber(), pageable.getPageSize());
 
     Category category = categoryRepo.findById(categoryId)
-        .orElseThrow(() -> ResourceNotFoundException.create("Category", "id", categoryId));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.CATEGORY, "id", categoryId));
 
     return productRepo.findByCategoryAndActive(category.getId(), pageable)
         .map(productMapper::toProductResponse);
@@ -131,7 +132,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Fetching related products for ID: {} with limit {}", id, limit);
     // 1. Get product by ID
     Product product = productRepo.findById(id)
-        .orElseThrow(() -> ResourceNotFoundException.create("Product", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.PRODUCT, "id", id));
 
     // 2. Get related products by category
     List<Product> relatedProducts = productRepo.findRelatedProducts(
@@ -220,7 +221,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Creating new product: {}", productRequest);
     // 1. Check if the category exists
     Category category = categoryRepo.findById(productRequest.getCategoryId())
-        .orElseThrow(() -> ResourceNotFoundException.create("Category", "id",
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.CATEGORY, "id",
             productRequest.getCategoryId()));
 
     // 2. Create the product
@@ -257,7 +258,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Updating product with ID {} to {}", id, productRequest);
     // 1. Check if the product exists
     Product product = productRepo.findByIdForUpdate(id)
-        .orElseThrow(() -> ResourceNotFoundException.create("Product", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.PRODUCT, "id", id));
 
     // 2. Update the product
     productMapper.updateProductFromRequest(productRequest, product);
@@ -272,7 +273,7 @@ public class ProductServiceImpl implements ProductService {
     if (productRequest.getCategoryId() != null
         && !productRequest.getCategoryId().equals(product.getCategory().getId())) {
       Category category = categoryRepo.findById(productRequest.getCategoryId())
-          .orElseThrow(() -> ResourceNotFoundException.create("Category", "id",
+          .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.CATEGORY, "id",
               productRequest.getCategoryId()));
       product.setCategory(category);
     }
@@ -301,7 +302,7 @@ public class ProductServiceImpl implements ProductService {
     log.info("Deleting product with ID: {}", id);
     // 1. Check if the product exists
     Product product = productRepo.findByIdForUpdate(id)
-        .orElseThrow(() -> ResourceNotFoundException.create("Product", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.PRODUCT, "id", id));
 
     // 2. Set the status to deleted
     product.setStatus(ProductStatus.DELETED);

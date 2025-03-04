@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.shintadev.shop_dev_be.constant.KafkaConstants;
+import com.shintadev.shop_dev_be.constant.ResourceName;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.RoleName;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
@@ -117,7 +118,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         .status(UserStatus.ACTIVE)
         .roles(
             Set.of(roleRepo.findByName(RoleName.USER)
-                .orElseThrow(() -> ResourceNotFoundException.create("Role", "name", RoleName.USER))))
+                .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.ROLE, "name", RoleName.USER))))
         .build();
 
     log.info("Registered user: {}", user);

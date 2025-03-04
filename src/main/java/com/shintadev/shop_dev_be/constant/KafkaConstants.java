@@ -1,10 +1,6 @@
 package com.shintadev.shop_dev_be.constant;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class KafkaConstants {
+public record KafkaConstants() {
 
   /*
    * Email Topics

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shintadev.shop_dev_be.constant.ResourceName;
 import com.shintadev.shop_dev_be.domain.dto.mapper.WishlistMapper;
 import com.shintadev.shop_dev_be.domain.dto.response.wishlist.WishlistResponse;
 import com.shintadev.shop_dev_be.domain.model.entity.product.Product;
@@ -51,7 +52,7 @@ public class WishlistServiceImpl implements WishlistService {
   public WishlistResponse getWishlist(Long userId) {
     // 1. Check if user exists
     User user = userRepo.findById(userId)
-        .orElseThrow(() -> ResourceNotFoundException.create("User", "id", userId.toString()));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.USER, "id", userId.toString()));
 
     // 2. Get or create wishlist
     Wishlist wishlist = wishlistRepo.findByUserId(userId)
@@ -104,7 +105,7 @@ public class WishlistServiceImpl implements WishlistService {
 
     // 2. Get product
     Product product = productRepo.findById(productId)
-        .orElseThrow(() -> ResourceNotFoundException.create("Product", "id", productId.toString()));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.PRODUCT, "id", productId.toString()));
 
     // 3. Check if product is already in wishlist
     Optional<WishlistItem> wishlistItemOpt = wishlistItemRepo.findByWishlistIdAndProductId(wishlist.getId(), productId);
@@ -164,7 +165,7 @@ public class WishlistServiceImpl implements WishlistService {
 
     // 2. Get wishlist item
     WishlistItem wishlistItem = wishlistItemRepo.findByWishlistIdAndProductId(wishlist.getId(), productId)
-        .orElseThrow(() -> ResourceNotFoundException.create("Wishlist item", "id", productId.toString()));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.WISHLIST_ITEM, "id", productId.toString()));
 
     // 3. Remove wishlist item
     wishlist.getItems().remove(wishlistItem);
@@ -217,7 +218,7 @@ public class WishlistServiceImpl implements WishlistService {
   private Wishlist getUserWishlist(Long userId) {
     // 1. Check if user exists
     User user = userRepo.findById(userId)
-        .orElseThrow(() -> ResourceNotFoundException.create("User", "id", userId.toString()));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.USER, "id", userId.toString()));
 
     // 2. Get or create wishlist
     return wishlistRepo.findByUserIdForUpdate(userId)

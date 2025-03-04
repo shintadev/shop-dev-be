@@ -9,6 +9,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shintadev.shop_dev_be.constant.ResourceName;
 import com.shintadev.shop_dev_be.domain.dto.mapper.CartMapper;
 import com.shintadev.shop_dev_be.domain.dto.request.cart.CartItemRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.cart.CartResponse;
@@ -55,7 +56,7 @@ public class CartServiceImpl implements CartService {
   public CartResponse getCart(Long userId) {
     // 1. Get user
     User user = userRepo.findById(userId)
-        .orElseThrow(() -> ResourceNotFoundException.create("User", "id", userId.toString()));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.USER, "id", userId.toString()));
 
     // 2. Get cart
     Cart cart = cartRepo.findByUserId(userId)
@@ -96,7 +97,8 @@ public class CartServiceImpl implements CartService {
 
         // 4. Get product
         Product product = productRepo.findById(request.getProductId())
-            .orElseThrow(() -> ResourceNotFoundException.create("Product", "id", request.getProductId().toString()));
+            .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.PRODUCT, "id",
+                request.getProductId().toString()));
 
         // 5. Check product status
         if (!product.getStatus().equals(ProductStatus.ACTIVE)) {
@@ -173,7 +175,8 @@ public class CartServiceImpl implements CartService {
 
         // 5. Check if product is available
         Product product = productRepo.findById(request.getProductId())
-            .orElseThrow(() -> ResourceNotFoundException.create("Product", "id", request.getProductId().toString()));
+            .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.PRODUCT, "id",
+                request.getProductId().toString()));
 
         // 6. Check stock
         if (product.getStock() < request.getQuantity()) {
@@ -314,7 +317,7 @@ public class CartServiceImpl implements CartService {
   private Cart getUserCart(Long userId) {
     // 1. Check if user exists
     User user = userRepo.findById(userId)
-        .orElseThrow(() -> ResourceNotFoundException.create("User", "id", userId.toString()));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.USER, "id", userId.toString()));
 
     // 2. Get or create cart
     return cartRepo.findByUserIdForUpdate(userId)

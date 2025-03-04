@@ -7,6 +7,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shintadev.shop_dev_be.constant.ResourceName;
 import com.shintadev.shop_dev_be.domain.dto.mapper.AddressMapper;
 import com.shintadev.shop_dev_be.domain.dto.request.user.AddressRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.user.AddressResponse;
@@ -60,7 +61,7 @@ public class AddressServiceImpl implements AddressService {
   @Transactional(readOnly = true)
   public AddressResponse getAddressById(Long id) {
     Address address = addressRepo.findById(id)
-        .orElseThrow(() -> ResourceNotFoundException.create("Address", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.ADDRESS, "id", id));
 
     return addressMapper.toAddressResponse(address);
   }
@@ -74,7 +75,7 @@ public class AddressServiceImpl implements AddressService {
   @Override
   public AddressResponse getDefaultAddress(Long userId) {
     Address address = addressRepo.findByUserIdAndIsDefaultTrue(userId)
-        .orElseThrow(() -> ResourceNotFoundException.create("Address", "userId", userId));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.ADDRESS, "userId", userId));
 
     return addressMapper.toAddressResponse(address);
   }
@@ -89,7 +90,7 @@ public class AddressServiceImpl implements AddressService {
   @Override
   public AddressResponse createAddress(Long userId, AddressRequest request) {
     User user = userRepo.findById(userId)
-        .orElseThrow(() -> ResourceNotFoundException.create("User", "id", userId));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.USER, "id", userId));
 
     Address address = addressMapper.toAddress(request);
     address.setUser(user);
@@ -122,7 +123,7 @@ public class AddressServiceImpl implements AddressService {
   @Override
   public AddressResponse updateAddress(Long userId, Long id, AddressRequest request) {
     Address address = addressRepo.findByIdForUpdate(id)
-        .orElseThrow(() -> ResourceNotFoundException.create("Address", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.ADDRESS, "id", id));
 
     if (!address.getUser().getId().equals(userId)) {
       throw new AccessDeniedException("You are not allowed to update this address");
@@ -148,7 +149,7 @@ public class AddressServiceImpl implements AddressService {
   @Override
   public AddressResponse setDefaultAddress(Long userId, Long id) {
     Address address = addressRepo.findByIdForUpdate(id)
-        .orElseThrow(() -> ResourceNotFoundException.create("Address", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.ADDRESS, "id", id));
 
     if (!address.getUser().getId().equals(userId)) {
       throw new AccessDeniedException("You are not allowed to set this address as default");
@@ -175,7 +176,7 @@ public class AddressServiceImpl implements AddressService {
   @Override
   public void deleteAddress(Long userId, Long id) {
     Address address = addressRepo.findByIdForUpdate(id)
-        .orElseThrow(() -> ResourceNotFoundException.create("Address", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.ADDRESS, "id", id));
 
     if (!address.getUser().getId().equals(userId)) {
       throw new AccessDeniedException("You are not allowed to delete this address");

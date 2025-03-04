@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +23,7 @@ import com.shintadev.shop_dev_be.domain.model.entity.user.EmailVerificationToken
 import com.shintadev.shop_dev_be.domain.model.entity.user.ResetPasswordToken;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
+import com.shintadev.shop_dev_be.exception.BadRequestException;
 import com.shintadev.shop_dev_be.kafka.EmailProducer;
 import com.shintadev.shop_dev_be.repository.user.EmailVerificationTokenRepo;
 import com.shintadev.shop_dev_be.repository.user.ResetPasswordTokenRepo;
@@ -89,11 +91,11 @@ public class AuthServiceImpl implements AuthService {
   public void verify(String token) {
     // 1. Check if token is exists
     EmailVerificationToken emailVerificationToken = emailVerificationTokenRepo.findById(UUID.fromString(token))
-        .orElseThrow(() -> new RuntimeException("Invalid verification token"));
+        .orElseThrow(() -> new BadCredentialsException("Invalid verification token"));
 
     // 2. Check if token is expired
     if (emailVerificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-      throw new RuntimeException("Verification token expired");
+      throw new BadCredentialsException("Verification token expired");
     }
 
     // 3. Update user status
@@ -113,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   /**
-   * Resends a verification email
+   * Re-sends a verification email
    * 
    * @param email the email address
    */
@@ -124,7 +126,7 @@ public class AuthServiceImpl implements AuthService {
 
     // 2. Check if user is active
     if (user.getStatus() == UserStatus.ACTIVE) {
-      throw new RuntimeException("User already verified");
+      throw new BadRequestException("User already verified");
     }
 
     // 3. Create email data
@@ -186,9 +188,9 @@ public class AuthServiceImpl implements AuthService {
     log.info("User: {}", user);
     if (user.getStatus() != UserStatus.ACTIVE) {
       if (user.getStatus() == UserStatus.INACTIVE) {
-        throw new RuntimeException("Please verify your email to login");
+        throw new BadRequestException("Please verify your email to login");
       } else {
-        throw new RuntimeException("User is not active");
+        throw new BadRequestException("User is not active");
       }
     }
     return jwtTokenProvider.generateToken(user);
@@ -258,11 +260,11 @@ public class AuthServiceImpl implements AuthService {
   public void resetPassword(String token, String newPassword) {
     // 1. Check if token exists
     ResetPasswordToken resetPasswordToken = resetPasswordTokenRepo.findById(UUID.fromString(token))
-        .orElseThrow(() -> new RuntimeException("Invalid reset password token"));
+        .orElseThrow(() -> new BadCredentialsException("Invalid reset password token"));
 
     // 2. Check if token is expired
     if (resetPasswordToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-      throw new RuntimeException("Reset password token expired");
+      throw new BadCredentialsException("Reset password token expired");
     }
 
     // 3. Update user password
@@ -282,7 +284,7 @@ public class AuthServiceImpl implements AuthService {
     // 1. Check if password is correct
     User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-      throw new RuntimeException("Invalid password");
+      throw new BadCredentialsException("Invalid password");
     }
 
     // 2. Update user password

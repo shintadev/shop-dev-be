@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.slugify.Slugify;
+import com.shintadev.shop_dev_be.constant.ResourceName;
 import com.shintadev.shop_dev_be.domain.dto.mapper.CategoryMapper;
 import com.shintadev.shop_dev_be.domain.dto.request.product.CategoryRequest;
 import com.shintadev.shop_dev_be.domain.dto.response.product.CategoryResponse;
@@ -122,7 +123,7 @@ public class CategoryServiceImpl implements CategoryService {
   public CategoryResponse getCategoryById(Long id) {
     return categoryRepo.findById(id)
         .map(categoryMapper::toCategoryResponse)
-        .orElseThrow(() -> ResourceNotFoundException.create("Category", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.CATEGORY, "id", id));
   }
 
   /**
@@ -165,7 +166,7 @@ public class CategoryServiceImpl implements CategoryService {
     log.info("Updating category: {}", id);
     // 1. Check if the category exists
     Category category = categoryRepo.findByIdForUpdate(id)
-        .orElseThrow(() -> ResourceNotFoundException.create("Category", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.CATEGORY, "id", id));
 
     // 2. Update the category
     categoryMapper.updateCategoryFromRequest(request, category);
@@ -196,7 +197,7 @@ public class CategoryServiceImpl implements CategoryService {
     log.info("Deleting category: {}", id);
     // 1. Check if the category exists
     Category category = categoryRepo.findByIdForUpdate(id)
-        .orElseThrow(() -> ResourceNotFoundException.create("Category", "id", id));
+        .orElseThrow(() -> ResourceNotFoundException.create(ResourceName.CATEGORY, "id", id));
 
     // 2. Delete the category
     categoryRepo.delete(category);
