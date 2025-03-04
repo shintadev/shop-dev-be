@@ -36,8 +36,8 @@ public class UserRequest {
   @Size(min = 2, max = 128, message = "Display name must be between 2 and 128 characters")
   private String displayName;
 
-  @Size(min = 10, max = 15, message = "Phone must be between 10 and 15 digits")
-  @Pattern(regexp = "^\\d{10,15}$", message = "Phone must contain only numbers")
+  @Size(min = 10, max = 16, message = "Phone number must be between 10 and 16 digits")
+  @Pattern(regexp = "^\\d{10,16}$", message = "Phone number must contain only numbers")
   private String phone;
 
   @Enumerated(EnumType.STRING)

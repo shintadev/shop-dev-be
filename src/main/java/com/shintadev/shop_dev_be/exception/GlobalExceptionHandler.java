@@ -135,7 +135,7 @@ public class GlobalExceptionHandler {
    * Handle validation errors
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+  public ResponseEntity<ApiResponse> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex,
       WebRequest request) {
 

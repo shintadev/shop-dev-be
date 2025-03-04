@@ -1,8 +1,10 @@
 package com.shintadev.shop_dev_be.domain.model.entity.user;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.shintadev.shop_dev_be.domain.model.entity.cart.Cart;
+import com.shintadev.shop_dev_be.domain.model.entity.order.Order;
 import com.shintadev.shop_dev_be.domain.model.entity.wishlist.Wishlist;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 
@@ -28,6 +31,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -84,9 +88,9 @@ public class User implements UserDetails {
   @Builder.Default
   private UserStatus status = UserStatus.INACTIVE;
 
-  // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval =
-  // true)
-  // private List<Address> addresses = new ArrayList<>();
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<Address> addresses = new ArrayList<>();
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private Cart cart;
@@ -94,8 +98,9 @@ public class User implements UserDetails {
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private Wishlist wishlist;
 
-  // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-  // private List<Order> orders = new ArrayList<>();
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  @Builder.Default
+  private List<Order> orders = new ArrayList<>();
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)
