@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -102,7 +103,8 @@ public class Order implements Serializable {
   @PrePersist
   public void prePersist() {
     // Generate order number
-    this.orderNumber = "ORD-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+    this.orderNumber = "ORD-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+        + "-" + new Random().nextInt(1000);
 
     // Calculate order price
     this.tax = this.subtotal.multiply(BigDecimal.valueOf(0.1));
