@@ -1,4 +1,4 @@
-package com.shintadev.shop_dev_be.kafka;
+package com.shintadev.shop_dev_be.kafka.producer;
 
 import java.util.Map;
 
@@ -6,6 +6,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import com.shintadev.shop_dev_be.constant.KafkaConstants;
+import com.shintadev.shop_dev_be.constant.kafka.KafkaTopic;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class EmailProducer {
    */
   public void sendVerificationEmail(Map<String, Object> emailData) {
     log.info("Sending verification email to: {}", emailData.get(KafkaConstants.RECIPIENT_EMAIL_KEY));
-    kafkaTemplate.send(KafkaConstants.VERIFICATION_EMAILS_TOPIC, emailData);
+    kafkaTemplate.send(KafkaTopic.VERIFICATION_EMAILS_TOPIC, emailData);
   }
 
   /**
@@ -37,7 +38,7 @@ public class EmailProducer {
    */
   public void sendPasswordResetEmail(Map<String, Object> emailData) {
     log.info("Sending password reset email to: {}", emailData.get(KafkaConstants.RECIPIENT_EMAIL_KEY));
-    kafkaTemplate.send(KafkaConstants.PASSWORD_RESET_EMAILS_TOPIC, emailData);
+    kafkaTemplate.send(KafkaTopic.PASSWORD_RESET_EMAILS_TOPIC, emailData);
   }
 
   /**
@@ -47,6 +48,6 @@ public class EmailProducer {
    */
   public void sendWelcomeEmail(Map<String, Object> emailData) {
     log.info("Sending welcome email to: {}", emailData.get(KafkaConstants.RECIPIENT_EMAIL_KEY));
-    kafkaTemplate.send(KafkaConstants.WELCOME_EMAILS_TOPIC, emailData);
+    kafkaTemplate.send(KafkaTopic.WELCOME_EMAILS_TOPIC, emailData);
   }
 }

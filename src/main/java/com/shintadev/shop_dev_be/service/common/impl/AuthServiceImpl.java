@@ -24,7 +24,7 @@ import com.shintadev.shop_dev_be.domain.model.entity.user.ResetPasswordToken;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 import com.shintadev.shop_dev_be.exception.BadRequestException;
-import com.shintadev.shop_dev_be.kafka.EmailProducer;
+import com.shintadev.shop_dev_be.kafka.producer.EmailProducer;
 import com.shintadev.shop_dev_be.repository.user.EmailVerificationTokenRepo;
 import com.shintadev.shop_dev_be.repository.user.ResetPasswordTokenRepo;
 import com.shintadev.shop_dev_be.security.jwt.JwtTokenProvider;
@@ -70,13 +70,14 @@ public class AuthServiceImpl implements AuthService {
     log.info("Email verification token: {}", emailVerificationToken);
     emailVerificationTokenRepo.save(emailVerificationToken);
 
-    // 3. Send verification email
-    Map<String, Object> emailData = new HashMap<>();
-    emailData.put(KafkaConstants.RECIPIENT_EMAIL_KEY, user.getEmail());
-    emailData.put(KafkaConstants.RECIPIENT_NAME_KEY, user.getDisplayName());
-    emailData.put(KafkaConstants.SUBJECT_KEY, "Verify your email");
+    // 3. Create email data
+    Map<String, Object> emailData = createEmailData(user, "Verify your email");
+
+    // 4. Add verification link to email data
     emailData.put(KafkaConstants.VERIFICATION_LINK_KEY,
         "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
+
+    // 5. Send verification email
     emailProducer.sendVerificationEmail(emailData);
     log.info("Verification email sent to {}", user.getEmail());
     log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
@@ -104,11 +105,10 @@ public class AuthServiceImpl implements AuthService {
     // 4. Delete token
     emailVerificationTokenRepo.delete(emailVerificationToken);
 
-    // 5. Send welcome email
-    Map<String, Object> emailData = new HashMap<>();
-    emailData.put(KafkaConstants.RECIPIENT_EMAIL_KEY, user.getEmail());
-    emailData.put(KafkaConstants.RECIPIENT_NAME_KEY, user.getDisplayName());
-    emailData.put(KafkaConstants.SUBJECT_KEY, "Welcome to our shop!");
+    // 5. Create welcome email data
+    Map<String, Object> emailData = createEmailData(user, "Welcome to our shop!");
+
+    // 6. Send welcome email
     emailProducer.sendWelcomeEmail(emailData);
     log.info("Welcome email sent to {}", user.getEmail());
     log.info("Welcome to our shop!");
@@ -130,12 +130,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     // 3. Create email data
-    Map<String, Object> emailData = new HashMap<>();
-    emailData.put(KafkaConstants.RECIPIENT_EMAIL_KEY, user.getEmail());
-    emailData.put(KafkaConstants.RECIPIENT_NAME_KEY, user.getDisplayName());
-    emailData.put(KafkaConstants.SUBJECT_KEY, "Verify your email");
+    Map<String, Object> emailData = createEmailData(user, "Verify your email");
 
-    // 4. Check if any token exists
+    // 4. Check if any token exists, if exists, delete all expired tokens
     List<EmailVerificationToken> emailVerificationTokens = emailVerificationTokenRepo.findByUserId(user.getId())
         .orElse(null);
     if (emailVerificationTokens != null) {
@@ -147,6 +144,7 @@ public class AuthServiceImpl implements AuthService {
           emailVerificationTokens.stream()
               .filter(token -> !token.equals(validToken))
               .toList());
+      // If valid token exists, add verification link to email data and send email
       if (validToken != null) {
         emailData.put(KafkaConstants.VERIFICATION_LINK_KEY,
             "http://localhost:8080/api/auth/verify?token=" + validToken.getId().toString());
@@ -164,9 +162,11 @@ public class AuthServiceImpl implements AuthService {
         .build();
     emailVerificationTokenRepo.save(emailVerificationToken);
 
-    // 6. Send verification email
+    // 6. Add verification link to email data
     emailData.put(KafkaConstants.VERIFICATION_LINK_KEY,
         "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
+
+    // 7. Send verification email
     emailProducer.sendVerificationEmail(emailData);
     log.info("Verification email sent to {}", user.getEmail());
     log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
@@ -207,10 +207,7 @@ public class AuthServiceImpl implements AuthService {
     UserResponse user = userService.getUserByEmail(email);
 
     // 2. Create email data
-    Map<String, Object> emailData = new HashMap<>();
-    emailData.put(KafkaConstants.RECIPIENT_EMAIL_KEY, user.getEmail());
-    emailData.put(KafkaConstants.RECIPIENT_NAME_KEY, user.getDisplayName());
-    emailData.put(KafkaConstants.SUBJECT_KEY, "Reset your password");
+    Map<String, Object> emailData = createEmailData(user, "Reset your password");
 
     // 3. Check if any token exists
     List<ResetPasswordToken> resetPasswordTokens = resetPasswordTokenRepo.findByUserId(user.getId())
@@ -241,9 +238,11 @@ public class AuthServiceImpl implements AuthService {
         .build();
     resetPasswordTokenRepo.save(resetPasswordToken);
 
-    // 5. Send reset password email
+    // 5. Add reset password link to email data
     emailData.put(KafkaConstants.RESET_LINK_KEY,
         "http://localhost:8080/api/auth/reset-password?token=" + resetPasswordToken.getId().toString());
+
+    // 6. Send reset password email
     emailProducer.sendPasswordResetEmail(emailData);
     log.info("Reset password email sent to {}", user.getEmail());
     log.info("Link: {}",
@@ -272,6 +271,8 @@ public class AuthServiceImpl implements AuthService {
 
     // 4. Delete token
     resetPasswordTokenRepo.delete(resetPasswordToken);
+
+    // TODO: Send email to notify that password is changed
   }
 
   /**
@@ -289,6 +290,15 @@ public class AuthServiceImpl implements AuthService {
 
     // 2. Update user password
     userService.updateUserPassword(user.getId(), request.getNewPassword());
+
+    // TODO: Send email to notify that password is changed
   }
 
+  private Map<String, Object> createEmailData(UserResponse user, String subject) {
+    Map<String, Object> emailData = new HashMap<>();
+    emailData.put(KafkaConstants.RECIPIENT_EMAIL_KEY, user.getEmail());
+    emailData.put(KafkaConstants.RECIPIENT_NAME_KEY, user.getDisplayName());
+    emailData.put(KafkaConstants.SUBJECT_KEY, subject);
+    return emailData;
+  }
 }

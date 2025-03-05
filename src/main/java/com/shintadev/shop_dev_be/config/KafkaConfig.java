@@ -12,6 +12,7 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
 
 import com.shintadev.shop_dev_be.constant.KafkaConstants;
+import com.shintadev.shop_dev_be.constant.kafka.KafkaTopic;
 
 /**
  * Configuration for Kafka
@@ -40,7 +41,7 @@ public class KafkaConfig {
    */
   @Bean
   public NewTopic verifyEmailTopic() {
-    return TopicBuilder.name(KafkaConstants.VERIFICATION_EMAILS_TOPIC)
+    return TopicBuilder.name(KafkaTopic.VERIFICATION_EMAILS_TOPIC)
         .partitions(3)
         .replicas(1)
         .build();
@@ -53,7 +54,7 @@ public class KafkaConfig {
    */
   @Bean
   public NewTopic passwordResetEmailTopic() {
-    return TopicBuilder.name(KafkaConstants.PASSWORD_RESET_EMAILS_TOPIC)
+    return TopicBuilder.name(KafkaTopic.PASSWORD_RESET_EMAILS_TOPIC)
         .partitions(3)
         .replicas(1)
         .build();
@@ -66,7 +67,7 @@ public class KafkaConfig {
    */
   @Bean
   public NewTopic welcomeEmailTopic() {
-    return TopicBuilder.name(KafkaConstants.WELCOME_EMAILS_TOPIC)
+    return TopicBuilder.name(KafkaTopic.WELCOME_EMAILS_TOPIC)
         .partitions(3)
         .replicas(1)
         .build();

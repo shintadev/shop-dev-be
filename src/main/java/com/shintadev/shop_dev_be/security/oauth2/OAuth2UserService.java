@@ -22,7 +22,7 @@ import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.RoleName;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 import com.shintadev.shop_dev_be.exception.ResourceNotFoundException;
-import com.shintadev.shop_dev_be.kafka.EmailProducer;
+import com.shintadev.shop_dev_be.kafka.producer.EmailProducer;
 import com.shintadev.shop_dev_be.repository.user.UserRepo;
 import com.shintadev.shop_dev_be.repository.user.RoleRepo;
 
