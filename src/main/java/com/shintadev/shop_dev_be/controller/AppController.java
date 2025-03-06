@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shintadev.shop_dev_be.domain.dto.response.ApiResponse;
@@ -20,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * @since 2025-03-03
  */
 @RestController
+@RequestMapping("/app")
 public class AppController {
 
   /**
@@ -58,7 +60,7 @@ public class AppController {
   }
 
   /**
-   * Get the profile
+   * Get the profile // TODO: move to user controller
    * 
    * @return current user's profile
    */

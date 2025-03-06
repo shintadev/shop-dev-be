@@ -44,6 +44,9 @@ public class OrderItem implements Serializable {
   @Column(name = "price", precision = 10, scale = 2, nullable = false)
   private BigDecimal price;
 
+  @Column(name = "discount_price", precision = 10, scale = 2)
+  private BigDecimal discountPrice;
+
   @Column(name = "quantity", nullable = false)
   private Integer quantity;
 
@@ -53,8 +56,11 @@ public class OrderItem implements Serializable {
   @PrePersist
   @PreUpdate
   public void calculateSubtotal() {
-    this.subtotal = product.getDiscountPrice() != null
-        ? product.getDiscountPrice().multiply(BigDecimal.valueOf(quantity))
-        : product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    this.price = product.getPrice();
+    this.discountPrice = product.getDiscountPrice();
+
+    this.subtotal = discountPrice != null
+        ? discountPrice.multiply(BigDecimal.valueOf(quantity))
+        : price.multiply(BigDecimal.valueOf(quantity));
   }
 }

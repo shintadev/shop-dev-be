@@ -52,7 +52,7 @@ public class SecurityConfig {
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(auth -> auth
             // Public endpoints
-            .requestMatchers("/host").permitAll()
+            .requestMatchers("/app/**").permitAll()
             .requestMatchers("/auth/**").permitAll()
             .requestMatchers("/products/**").permitAll()
             .requestMatchers("/categories/**").permitAll()

@@ -37,6 +37,14 @@ public class OrderController {
 
   private final OrderService orderService;
 
+  /**
+   * Get all orders of a user
+   * 
+   * @param user the authenticated user
+   * @param page the page number
+   * @param size the page size
+   * @return the list of orders
+   */
   @GetMapping
   public ResponseEntity<ApiResponse> getAllUserOrders(
       @AuthenticationPrincipal User user,
@@ -55,6 +63,12 @@ public class OrderController {
             .build());
   }
 
+  /**
+   * Get an order by its id
+   * 
+   * @param id the id of the order
+   * @return the order
+   */
   @GetMapping("/{id}")
   public ResponseEntity<ApiResponse> getOrderById(@PathVariable Long id) {
     var order = orderService.getOrderById(id);
@@ -66,6 +80,15 @@ public class OrderController {
             .build());
   }
 
+  /**
+   * Get all orders of a user by their status
+   * 
+   * @param user   the authenticated user
+   * @param status the status of the orders
+   * @param page   the page number
+   * @param size   the page size
+   * @return the list of orders
+   */
   @GetMapping("/status/{status}")
   public ResponseEntity<ApiResponse> getOrdersByStatus(
       @AuthenticationPrincipal User user,
@@ -85,6 +108,12 @@ public class OrderController {
             .build());
   }
 
+  /**
+   * Get an order by its order number
+   * 
+   * @param orderNumber the order number
+   * @return the order
+   */
   @GetMapping("/tracking/{orderNumber}")
   public ResponseEntity<ApiResponse> getOrderTracking(
       @PathVariable String orderNumber) {
@@ -97,6 +126,13 @@ public class OrderController {
             .build());
   }
 
+  /**
+   * Get the recent orders of a user
+   * 
+   * @param user  the authenticated user
+   * @param limit the limit of the orders
+   * @return the list of orders
+   */
   @GetMapping("/recent")
   public ResponseEntity<ApiResponse> getRecentOrders(
       @AuthenticationPrincipal User user,
@@ -110,6 +146,13 @@ public class OrderController {
             .build());
   }
 
+  /**
+   * Create an order
+   * 
+   * @param user         the authenticated user
+   * @param orderRequest the order request
+   * @return the order
+   */
   @PostMapping
   public ResponseEntity<ApiResponse> createOrder(
       @AuthenticationPrincipal User user,
@@ -123,6 +166,13 @@ public class OrderController {
             .build());
   }
 
+  /**
+   * Cancel an order
+   * 
+   * @param user the authenticated user
+   * @param id   the id of the order
+   * @return the order
+   */
   @PutMapping("/{id}/cancel")
   public ResponseEntity<ApiResponse> cancelOrder(
       @AuthenticationPrincipal User user,
@@ -136,6 +186,12 @@ public class OrderController {
             .build());
   }
 
+  /**
+   * Get the count of orders of a user
+   * 
+   * @param user the authenticated user
+   * @return the count of orders
+   */
   @GetMapping("/count")
   public ResponseEntity<ApiResponse> getOrderCount(@AuthenticationPrincipal User user) {
     var count = orderService.getOrderCount(user.getId());
