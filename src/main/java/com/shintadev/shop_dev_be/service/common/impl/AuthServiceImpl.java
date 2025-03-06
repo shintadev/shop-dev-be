@@ -14,7 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.shintadev.shop_dev_be.constant.KafkaConstants;
+import com.shintadev.shop_dev_be.constant.kafka.EmailNotificationType;
+import com.shintadev.shop_dev_be.constant.kafka.KafkaMessageDataAttribute;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.ChangePasswordRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.LoginRequest;
 import com.shintadev.shop_dev_be.domain.dto.request.auth.RegisterRequest;
@@ -24,7 +25,7 @@ import com.shintadev.shop_dev_be.domain.model.entity.user.ResetPasswordToken;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 import com.shintadev.shop_dev_be.exception.BadRequestException;
-import com.shintadev.shop_dev_be.kafka.producer.EmailProducer;
+import com.shintadev.shop_dev_be.kafka.producer.MessageProducer;
 import com.shintadev.shop_dev_be.repository.user.EmailVerificationTokenRepo;
 import com.shintadev.shop_dev_be.repository.user.ResetPasswordTokenRepo;
 import com.shintadev.shop_dev_be.security.jwt.JwtTokenProvider;
@@ -50,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
   private final EmailVerificationTokenRepo emailVerificationTokenRepo;
   private final ResetPasswordTokenRepo resetPasswordTokenRepo;
   private final PasswordEncoder passwordEncoder;
-  private final EmailProducer emailProducer;
+  private final MessageProducer messageProducer;
 
   /**
    * Registers a new user
@@ -71,14 +72,14 @@ public class AuthServiceImpl implements AuthService {
     emailVerificationTokenRepo.save(emailVerificationToken);
 
     // 3. Create email data
-    Map<String, Object> emailData = createEmailData(user, "Verify your email");
+    Map<String, Object> emailData = createEmailData(user, "Verify your email", EmailNotificationType.VERIFICATION);
 
     // 4. Add verification link to email data
-    emailData.put(KafkaConstants.VERIFICATION_LINK_KEY,
+    emailData.put(KafkaMessageDataAttribute.VERIFICATION_LINK_KEY,
         "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
 
     // 5. Send verification email
-    emailProducer.sendVerificationEmail(emailData);
+    messageProducer.sendEmailNotification(emailData);
     log.info("Verification email sent to {}", user.getEmail());
     log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
   }
@@ -106,10 +107,10 @@ public class AuthServiceImpl implements AuthService {
     emailVerificationTokenRepo.delete(emailVerificationToken);
 
     // 5. Create welcome email data
-    Map<String, Object> emailData = createEmailData(user, "Welcome to our shop!");
+    Map<String, Object> emailData = createEmailData(user, "Welcome to our shop!", EmailNotificationType.WELCOME);
 
     // 6. Send welcome email
-    emailProducer.sendWelcomeEmail(emailData);
+    messageProducer.sendEmailNotification(emailData);
     log.info("Welcome email sent to {}", user.getEmail());
     log.info("Welcome to our shop!");
   }
@@ -130,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     // 3. Create email data
-    Map<String, Object> emailData = createEmailData(user, "Verify your email");
+    Map<String, Object> emailData = createEmailData(user, "Verify your email", EmailNotificationType.VERIFICATION);
 
     // 4. Check if any token exists, if exists, delete all expired tokens
     List<EmailVerificationToken> emailVerificationTokens = emailVerificationTokenRepo.findByUserId(user.getId())
@@ -146,9 +147,9 @@ public class AuthServiceImpl implements AuthService {
               .toList());
       // If valid token exists, add verification link to email data and send email
       if (validToken != null) {
-        emailData.put(KafkaConstants.VERIFICATION_LINK_KEY,
+        emailData.put(KafkaMessageDataAttribute.VERIFICATION_LINK_KEY,
             "http://localhost:8080/api/auth/verify?token=" + validToken.getId().toString());
-        emailProducer.sendVerificationEmail(emailData);
+        messageProducer.sendEmailNotification(emailData);
         log.info("Verification email sent to {}", user.getEmail());
         log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + validToken.getId().toString());
         return;
@@ -163,11 +164,11 @@ public class AuthServiceImpl implements AuthService {
     emailVerificationTokenRepo.save(emailVerificationToken);
 
     // 6. Add verification link to email data
-    emailData.put(KafkaConstants.VERIFICATION_LINK_KEY,
+    emailData.put(KafkaMessageDataAttribute.VERIFICATION_LINK_KEY,
         "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
 
     // 7. Send verification email
-    emailProducer.sendVerificationEmail(emailData);
+    messageProducer.sendEmailNotification(emailData);
     log.info("Verification email sent to {}", user.getEmail());
     log.info("Link: {}", "http://localhost:8080/api/auth/verify?token=" + emailVerificationToken.getId().toString());
   }
@@ -207,7 +208,7 @@ public class AuthServiceImpl implements AuthService {
     UserResponse user = userService.getUserByEmail(email);
 
     // 2. Create email data
-    Map<String, Object> emailData = createEmailData(user, "Reset your password");
+    Map<String, Object> emailData = createEmailData(user, "Reset your password", EmailNotificationType.PASSWORD_RESET);
 
     // 3. Check if any token exists
     List<ResetPasswordToken> resetPasswordTokens = resetPasswordTokenRepo.findByUserId(user.getId())
@@ -222,9 +223,9 @@ public class AuthServiceImpl implements AuthService {
               .filter(token -> !token.equals(validToken))
               .toList());
       if (validToken != null) {
-        emailData.put(KafkaConstants.RESET_LINK_KEY,
+        emailData.put(KafkaMessageDataAttribute.RESET_LINK_KEY,
             "http://localhost:8080/api/auth/reset-password?token=" + validToken.getId().toString());
-        emailProducer.sendPasswordResetEmail(emailData);
+        messageProducer.sendEmailNotification(emailData);
         log.info("Reset password email sent to {}", user.getEmail());
         log.info("Link: {}", "http://localhost:8080/api/auth/reset-password?token=" + validToken.getId().toString());
         return;
@@ -239,11 +240,11 @@ public class AuthServiceImpl implements AuthService {
     resetPasswordTokenRepo.save(resetPasswordToken);
 
     // 5. Add reset password link to email data
-    emailData.put(KafkaConstants.RESET_LINK_KEY,
+    emailData.put(KafkaMessageDataAttribute.RESET_LINK_KEY,
         "http://localhost:8080/api/auth/reset-password?token=" + resetPasswordToken.getId().toString());
 
     // 6. Send reset password email
-    emailProducer.sendPasswordResetEmail(emailData);
+    messageProducer.sendEmailNotification(emailData);
     log.info("Reset password email sent to {}", user.getEmail());
     log.info("Link: {}",
         "http://localhost:8080/api/auth/reset-password?token=" + resetPasswordToken.getId().toString());
@@ -294,11 +295,12 @@ public class AuthServiceImpl implements AuthService {
     // TODO: Send email to notify that password is changed
   }
 
-  private Map<String, Object> createEmailData(UserResponse user, String subject) {
+  private Map<String, Object> createEmailData(UserResponse user, String subject, String type) {
     Map<String, Object> emailData = new HashMap<>();
-    emailData.put(KafkaConstants.RECIPIENT_EMAIL_KEY, user.getEmail());
-    emailData.put(KafkaConstants.RECIPIENT_NAME_KEY, user.getDisplayName());
-    emailData.put(KafkaConstants.SUBJECT_KEY, subject);
+    emailData.put(KafkaMessageDataAttribute.EMAIL_TYPE_KEY, type);
+    emailData.put(KafkaMessageDataAttribute.RECIPIENT_EMAIL_KEY, user.getEmail());
+    emailData.put(KafkaMessageDataAttribute.RECIPIENT_NAME_KEY, user.getDisplayName());
+    emailData.put(KafkaMessageDataAttribute.SUBJECT_KEY, subject);
     return emailData;
   }
 }

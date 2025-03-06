@@ -18,4 +18,20 @@ public interface EmailService {
       String to,
       String name,
       String subject);
+
+  void sendOrderConfirmationEmail(
+      String to,
+      String name,
+      String subject);
+
+  void sendOrderStatusUpdateEmail(
+      String to,
+      String name,
+      String subject,
+      String orderStatus);
+
+  void sendOrderCancelledEmail(
+      String to,
+      String name,
+      String subject);
 }

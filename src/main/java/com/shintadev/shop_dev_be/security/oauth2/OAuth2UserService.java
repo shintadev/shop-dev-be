@@ -16,13 +16,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.shintadev.shop_dev_be.constant.KafkaConstants;
 import com.shintadev.shop_dev_be.constant.ResourceName;
+import com.shintadev.shop_dev_be.constant.kafka.EmailNotificationType;
+import com.shintadev.shop_dev_be.constant.kafka.KafkaMessageDataAttribute;
 import com.shintadev.shop_dev_be.domain.model.entity.user.User;
 import com.shintadev.shop_dev_be.domain.model.enums.user.RoleName;
 import com.shintadev.shop_dev_be.domain.model.enums.user.UserStatus;
 import com.shintadev.shop_dev_be.exception.ResourceNotFoundException;
-import com.shintadev.shop_dev_be.kafka.producer.EmailProducer;
+import com.shintadev.shop_dev_be.kafka.producer.MessageProducer;
 import com.shintadev.shop_dev_be.repository.user.UserRepo;
 import com.shintadev.shop_dev_be.repository.user.RoleRepo;
 
@@ -40,7 +41,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
   private final UserRepo userRepo;
   private final RoleRepo roleRepo;
-  private final EmailProducer emailProducer;
+  private final MessageProducer messageProducer;
 
   /**
    * Load user details from OAuth2 provider
@@ -90,10 +91,11 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     } else {
       user = registerOAuth2User(attributes);
       Map<String, Object> emailData = new HashMap<>();
-      emailData.put(KafkaConstants.RECIPIENT_EMAIL_KEY, user.getEmail());
-      emailData.put(KafkaConstants.RECIPIENT_NAME_KEY, user.getDisplayName());
-      emailData.put(KafkaConstants.SUBJECT_KEY, "Welcome to Shop Dev");
-      emailProducer.sendWelcomeEmail(emailData);
+      emailData.put(KafkaMessageDataAttribute.EMAIL_TYPE_KEY, EmailNotificationType.WELCOME);
+      emailData.put(KafkaMessageDataAttribute.RECIPIENT_EMAIL_KEY, user.getEmail());
+      emailData.put(KafkaMessageDataAttribute.RECIPIENT_NAME_KEY, user.getDisplayName());
+      emailData.put(KafkaMessageDataAttribute.SUBJECT_KEY, "Welcome to Shop Dev");
+      messageProducer.sendEmailNotification(emailData);
     }
 
     return new DefaultOAuth2User(

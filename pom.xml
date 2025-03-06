@@ -13,7 +13,7 @@
 
 	<groupId>com.shintadev</groupId>
 	<artifactId>shop-dev-be</artifactId>
-	<version>0.1.3-SNAPSHOT</version>
+	<version>0.1.4-SNAPSHOT</version>
 	<name>shop-dev-be</name>
 	<description>Sample shop web RESTful API using Spring Boot</description>
 	<url>https://github.com/shintadev/shop-dev-be</url>
