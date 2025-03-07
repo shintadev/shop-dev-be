@@ -131,4 +131,22 @@ public class EmailServiceImpl implements EmailService {
       log.error("Failed to send welcome email", e);
     }
   }
+
+  @Override
+  public void sendOrderConfirmationEmail(String to, String name, String subject) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'sendOrderConfirmationEmail'");
+  }
+
+  @Override
+  public void sendOrderStatusUpdateEmail(String to, String name, String subject, String orderStatus) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'sendOrderStatusUpdateEmail'");
+  }
+
+  @Override
+  public void sendOrderCancelledEmail(String to, String name, String subject) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'sendOrderCancelledEmail'");
+  }
 }

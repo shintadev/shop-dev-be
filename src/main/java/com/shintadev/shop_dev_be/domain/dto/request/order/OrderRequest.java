@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class OrderRequest {
 
-  private String addressId;
+  private Long addressId;
 
   private String notes;
 
